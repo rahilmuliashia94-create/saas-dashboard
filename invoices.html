@@ -1,0 +1,2393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Everest Security — Invoice Generator Pro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#062026;
+  --panel:#0d1519;
+  --muted:#95a9b8;
+  --accent:#22c55e;
+  --accent-2:#9ef07e;
+  --accent-glow:rgba(34,197,94,0.3);
+  --glass: rgba(255,255,255,0.03);
+  --danger:#ef4444;
+  --warning:#fbbf24;
+  --info:#60a5fa;
+  --purple:#a855f7;
+  --orange:#f97316;
+  --pink:#ec4899;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background: linear-gradient(180deg, #02110d 0%, #062026 100%);
+  color:#e7f3f7;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+
+.bg-animation{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+.bg-animation::before{
+  content:'';
+  position:absolute;
+  width:800px;
+  height:800px;
+  background:radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%);
+  top:-300px;
+  right:-300px;
+  animation:pulse 12s ease-in-out infinite;
+}
+.bg-animation::after{
+  content:'';
+  position:absolute;
+  width:500px;
+  height:500px;
+  background:radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+  bottom:-150px;
+  left:-150px;
+  animation:pulse 15s ease-in-out infinite reverse;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1); opacity:0.4; }
+  50%{ transform:scale(1.4); opacity:0.7; }
+}
+
+.page-frame{
+  max-width:1500px;
+  margin:16px auto;
+  padding:12px;
+  border-radius:16px;
+  background: linear-gradient(135deg, rgba(0,255,106,0.12), rgba(168,85,247,0.06));
+  box-shadow: 0 28px 80px rgba(2,10,8,0.5);
+  position:relative;
+  z-index:1;
+}
+
+.app {
+  display:flex;
+  gap:12px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(8,12,14,0.98), rgba(5,8,10,0.95));
+  padding:12px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg, rgba(2,6,10,0.95), rgba(1,4,8,0.92));
+  padding:16px;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  border-right:1px solid rgba(255,255,255,0.03);
+  position:sticky;
+  top:16px;
+  height:calc(100vh - 56px);
+  overflow-y:auto;
+}
+.brand{ 
+  color:var(--accent); 
+  font-weight:800; 
+  font-size:18px; 
+  display:flex; 
+  gap:10px; 
+  align-items:center;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.brand .logo-dot{ 
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); 
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center; 
+  color:#042017; 
+  font-weight:800; 
+  font-size:16px;
+  box-shadow:0 4px 20px var(--accent-glow);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{ box-shadow:0 4px 20px var(--accent-glow); }
+  50%{ box-shadow:0 4px 30px var(--accent-glow), 0 0 40px var(--accent-glow); }
+}
+
+.searchbox{ 
+  background:var(--glass); 
+  border-radius:10px; 
+  padding:12px 14px; 
+  color:var(--muted); 
+  font-size:13px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.2s;
+}
+.menu { margin-top:4px; display:flex; flex-direction:column; gap:4px; }
+.menu .section{ 
+  color:var(--muted); 
+  font-size:10px; 
+  margin-top:12px; 
+  margin-bottom:4px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:600;
+}
+.menu a{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  color:#b8d4c8; 
+  text-decoration:none; 
+  padding:10px 12px; 
+  border-radius:10px; 
+  font-size:13.5px;
+  font-weight:500;
+  transition:all 0.2s ease;
+  position:relative;
+  overflow:hidden;
+}
+.menu a::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:var(--accent);
+  transform:scaleY(0);
+  transition:transform 0.2s;
+  border-radius:0 3px 3px 0;
+}
+.menu a:hover{ 
+  background:rgba(255,255,255,0.04);
+  color:#fff;
+  transform:translateX(4px);
+}
+.menu a.active{ 
+  background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05));
+  color:#fff;
+}
+.menu a.active::before{ transform:scaleY(1); }
+.menu a .icon{ font-size:16px; }
+
+.live-indicator{
+  margin-top:auto;
+  padding:14px;
+  background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.02));
+  border-radius:10px;
+  border:1px solid rgba(34,197,94,0.15);
+}
+.live-indicator .status{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  font-weight:500;
+}
+.live-indicator .pulse{
+  width:10px;
+  height:10px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.3); opacity:0.7; }
+}
+.live-indicator .company{ margin-top:8px; font-size:12px; color:var(--muted); }
+
+/* CENTER */
+.center { 
+  flex:1; 
+  border-radius:12px; 
+  padding:12px; 
+  display:flex; 
+  flex-direction:column; 
+  gap:12px;
+  overflow:hidden;
+}
+
+.header { 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  gap:12px;
+  padding:8px 4px;
+}
+.breadcrumbs{ color:var(--muted); font-size:12px; display:flex; gap:8px; align-items:center; }
+.header h1{ margin:0; font-size:22px; font-weight:700; }
+
+.header-actions{ display:flex; gap:10px; align-items:center; }
+
+/* Buttons */
+.btn-primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  color:#041018;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(34,197,94,0.4); }
+
+.btn-secondary{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:600;
+  color:#cfe8d6;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn-secondary:hover{ background:rgba(255,255,255,0.1); }
+
+.btn-purple{
+  background:linear-gradient(90deg,var(--purple),#c084fc);
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s;
+}
+.btn-purple:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(168,85,247,0.4); }
+
+.btn-danger{
+  background:linear-gradient(90deg,var(--danger),#f87171);
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.btn-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.btn-icon:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+
+/* Stats */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:12px;
+}
+.stat-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  padding:18px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.3s ease;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.stat-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform:scaleX(0);
+  transition:transform 0.3s;
+}
+.stat-card:hover{ transform:translateY(-4px); }
+.stat-card:hover::before{ transform:scaleX(1); }
+.stat-card .label{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
+.stat-card .value{ font-weight:800; font-size:24px; margin-top:6px; }
+.stat-card .change{ font-size:12px; margin-top:6px; display:flex; align-items:center; gap:4px; }
+.stat-card.positive .value{ color:var(--accent); }
+.stat-card.warning .value{ color:var(--warning); }
+.stat-card.danger .value{ color:var(--danger); }
+.stat-card.info .value{ color:var(--info); }
+.stat-card.purple .value{ color:var(--purple); }
+
+/* Tabs */
+.tabs{
+  display:flex;
+  gap:4px;
+  background:var(--glass);
+  padding:4px;
+  border-radius:10px;
+  width:fit-content;
+}
+.tab{
+  padding:10px 20px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  color:var(--muted);
+  transition:all 0.2s ease;
+  border:none;
+  background:transparent;
+}
+.tab.active{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#041018;
+}
+.tab:hover:not(.active){ color:#fff; }
+
+.content-panel{ display:none; }
+.content-panel.active{ display:block; animation:fadeIn 0.3s ease; }
+@keyframes fadeIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+/* Templates */
+.templates-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+  gap:14px;
+  margin-top:14px;
+}
+.template-card{
+  background:linear-gradient(180deg, rgba(12,16,18,0.9), rgba(8,12,14,0.7));
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:14px;
+  padding:20px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  position:relative;
+}
+.template-card:hover{
+  border-color:rgba(34,197,94,0.3);
+  transform:translateY(-4px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+.template-card.featured{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(34,197,94,0.2), 0 20px 40px rgba(0,0,0,0.3);
+}
+.template-card .badge{
+  position:absolute;
+  top:16px;
+  right:16px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.template-card .badge.active{ background:rgba(34,197,94,0.2); color:var(--accent); }
+.template-card .badge.draft{ background:rgba(251,191,36,0.2); color:var(--warning); }
+.template-name{ font-weight:700; font-size:16px; margin-bottom:8px; padding-right:70px; }
+.template-desc{ color:var(--muted); font-size:13px; margin-bottom:16px; line-height:1.5; }
+.template-meta{ display:flex; gap:20px; font-size:12px; color:var(--muted); margin-bottom:16px; }
+.template-meta span{ display:flex; align-items:center; gap:6px; }
+.template-total{ 
+  font-size:24px; 
+  font-weight:800; 
+  color:var(--accent);
+  margin-bottom:16px;
+}
+.template-actions{ display:flex; gap:10px; }
+.template-actions button{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  transition:all 0.2s;
+}
+.template-actions .btn-use{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#041018;
+}
+.template-actions .btn-use:hover{ transform:translateY(-2px); }
+.template-actions .btn-edit{
+  background:rgba(255,255,255,0.08);
+  color:#cfe8d6;
+}
+.template-actions .btn-edit:hover{ background:rgba(255,255,255,0.12); }
+
+.add-template{
+  border:2px dashed rgba(255,255,255,0.12);
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:200px;
+  gap:12px;
+}
+.add-template:hover{ border-color:var(--accent); background:rgba(34,197,94,0.05); }
+.add-template .plus{ 
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:var(--glass);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  color:var(--accent);
+}
+.add-template span{ color:var(--muted); font-size:14px; }
+
+/* Invoice Table */
+.table-panel{
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  overflow:hidden;
+}
+.table-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.table-filters{ display:flex; gap:10px; align-items:center; }
+.search-input, .filter-select{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:8px;
+  padding:10px 14px;
+  color:#cfe8d3;
+  font-size:13px;
+}
+.search-input{ width:220px; }
+.table-wrap{ overflow:auto; max-height:450px; }
+table{ width:100%; border-collapse:collapse; color:#e3f7ee; font-size:13px; }
+thead th{ 
+  text-align:left; 
+  padding:14px 12px; 
+  color:var(--muted); 
+  font-size:11px; 
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  position:sticky; 
+  top:0; 
+  background:rgba(10,14,16,0.98);
+  z-index:1;
+  font-weight:600;
+}
+tbody td{ padding:14px 12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+tbody tr{ transition:all 0.2s; }
+tbody tr:hover{ background:linear-gradient(90deg, rgba(34,197,94,0.05), transparent); }
+
+.invoice-id{ font-family:monospace; font-weight:700; color:var(--accent); font-size:14px; }
+.amount{ font-weight:700; font-size:14px; }
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+}
+.status-paid{ background:rgba(34,197,94,0.15); color:var(--accent); }
+.status-pending{ background:rgba(251,191,36,0.15); color:var(--warning); }
+.status-overdue{ background:rgba(239,68,68,0.15); color:var(--danger); }
+.status-draft{ background:rgba(96,165,250,0.15); color:var(--info); }
+
+.action-btns{ display:flex; gap:6px; }
+.action-btn{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.action-btn:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+
+/* Modal */
+.modal-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(10px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.modal-overlay.show{ display:flex; }
+.modal{
+  background:linear-gradient(180deg, rgba(14,18,20,0.98), rgba(8,12,14,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  width:100%;
+  max-width:700px;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  animation:modalIn 0.3s ease;
+}
+.modal.wide{ max-width:900px; }
+.modal.xl{ max-width:1100px; }
+@keyframes modalIn{
+  from{ transform:scale(0.9); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.modal-header h2{ margin:0; font-size:18px; }
+.modal-close{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  font-size:24px;
+  cursor:pointer;
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.modal-close:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+.modal-body{ padding:24px; }
+.modal-footer{
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+  padding:18px 24px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+
+/* Form */
+.form-group{ margin-bottom:18px; }
+.form-group label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:8px;
+  font-weight:500;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;
+  padding:12px 16px;
+  color:#e7f3f7;
+  font-size:14px;
+  font-family:inherit;
+  transition:all 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(34,197,94,0.1);
+}
+.form-group textarea{ min-height:100px; resize:vertical; }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.form-row.three{ grid-template-columns:1fr 1fr 1fr; }
+
+/* Line items */
+.line-items{ margin-top:20px; }
+.line-item{
+  display:grid;
+  grid-template-columns:2fr 80px 120px 100px 40px;
+  gap:10px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.line-item input{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:8px;
+  padding:10px;
+  color:#e7f3f7;
+  font-size:13px;
+}
+.line-item .remove-btn{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  border:none;
+  background:rgba(239,68,68,0.15);
+  color:var(--danger);
+  cursor:pointer;
+  font-size:18px;
+  transition:all 0.2s;
+}
+.line-item .remove-btn:hover{ background:rgba(239,68,68,0.25); }
+.line-item-header{
+  display:grid;
+  grid-template-columns:2fr 80px 120px 100px 40px;
+  gap:10px;
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:8px;
+  padding:0 10px;
+}
+.add-line-btn{
+  background:transparent;
+  border:1px dashed rgba(255,255,255,0.15);
+  color:var(--muted);
+  padding:12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:13px;
+  width:100%;
+  margin-top:12px;
+  transition:all 0.2s;
+}
+.add-line-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+.totals-box{
+  background:var(--glass);
+  border-radius:12px;
+  padding:20px;
+  margin-top:20px;
+}
+.totals-box .row{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  font-size:14px;
+}
+.totals-box .row.total{
+  border-top:1px solid rgba(255,255,255,0.08);
+  margin-top:12px;
+  padding-top:16px;
+  font-size:20px;
+  font-weight:800;
+}
+.totals-box .row.total .amount{ color:var(--accent); }
+
+/* Client selector for bulk */
+.client-selector{
+  max-height:350px;
+  overflow:auto;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:12px;
+}
+.term-section{
+  margin-bottom:16px;
+}
+.term-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.04);
+  border-radius:8px;
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.term-header:hover{ background:rgba(255,255,255,0.06); }
+.term-header input{ width:18px; height:18px; accent-color:var(--accent); }
+.term-header .term-name{ font-weight:600; font-size:13px; flex:1; }
+.term-header .term-count{ font-size:12px; color:var(--muted); }
+.client-option{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all 0.15s;
+  margin-left:20px;
+}
+.client-option:hover{ background:rgba(255,255,255,0.04); }
+.client-option input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--accent); }
+.client-info{ flex:1; }
+.client-name{ font-weight:500; font-size:13px; }
+.client-email{ color:var(--muted); font-size:11px; }
+.client-price{ font-weight:700; color:var(--accent); font-size:13px; }
+
+/* Smart select summary */
+.smart-summary{
+  background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(168,85,247,0.1));
+  border:1px solid rgba(34,197,94,0.2);
+  border-radius:12px;
+  padding:16px;
+  margin-top:16px;
+}
+.smart-summary .title{ font-weight:600; margin-bottom:12px; }
+.smart-summary .grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:16px;
+}
+.smart-summary .item{ text-align:center; }
+.smart-summary .item .value{ font-size:24px; font-weight:800; color:var(--accent); }
+.smart-summary .item .label{ font-size:11px; color:var(--muted); margin-top:4px; }
+
+/* Invoice Preview */
+.invoice-preview{
+  background:#fff;
+  color:#1a1a1a;
+  border-radius:12px;
+  padding:40px;
+  margin-top:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+.preview-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:40px;
+  padding-bottom:30px;
+  border-bottom:3px solid #22c55e;
+}
+.preview-logo{ 
+  font-size:32px; 
+  font-weight:800; 
+  background:linear-gradient(135deg, #22c55e, #16a34a);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.preview-title{ font-size:36px; font-weight:300; color:#666; letter-spacing:2px; }
+.preview-meta{ text-align:right; }
+.preview-meta .label{ font-size:12px; color:#999; text-transform:uppercase; }
+.preview-meta .value{ font-size:16px; font-weight:600; margin-top:4px; }
+.preview-details{ 
+  display:grid; 
+  grid-template-columns:1fr 1fr; 
+  gap:40px; 
+  margin-bottom:40px; 
+}
+.preview-from, .preview-to{ font-size:14px; line-height:1.8; }
+.preview-from strong, .preview-to strong{ 
+  display:block; 
+  margin-bottom:8px; 
+  color:#000; 
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.preview-table{ width:100%; border-collapse:collapse; margin-bottom:40px; }
+.preview-table th{ 
+  text-align:left; 
+  padding:16px; 
+  background:#f8fafc; 
+  font-size:12px; 
+  color:#64748b; 
+  border-bottom:2px solid #e2e8f0;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+.preview-table td{ padding:16px; border-bottom:1px solid #e2e8f0; font-size:14px; }
+.preview-table .total-col{ text-align:right; font-weight:600; }
+.preview-totals{ margin-left:auto; width:350px; }
+.preview-totals .row{ 
+  display:flex; 
+  justify-content:space-between; 
+  padding:10px 0; 
+  font-size:14px;
+  color:#64748b;
+}
+.preview-totals .row.total{ 
+  font-size:24px; 
+  font-weight:800; 
+  border-top:3px solid #22c55e;
+  margin-top:16px;
+  padding-top:20px;
+  color:#000;
+}
+.preview-footer{
+  margin-top:50px;
+  padding-top:30px;
+  border-top:1px solid #e2e8f0;
+  text-align:center;
+  font-size:13px;
+  color:#64748b;
+}
+
+/* Chart containers */
+.chart-container{
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:20px;
+}
+.chart-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+.chart-header h3{ margin:0; font-size:15px; font-weight:700; }
+.chart-period{ display:flex; gap:4px; }
+.period-btn{
+  padding:8px 14px;
+  border-radius:8px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-size:12px;
+  cursor:pointer;
+  font-weight:500;
+  transition:all 0.2s;
+}
+.period-btn.active{ background:var(--accent); color:#041018; }
+.period-btn:hover:not(.active){ color:#fff; }
+
+/* Recurring table */
+.recurring-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  background:rgba(168,85,247,0.15);
+  color:var(--purple);
+}
+
+/* Toast */
+.toast-container{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:2000;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.toast{
+  background:linear-gradient(135deg, rgba(14,18,20,0.98), rgba(8,12,14,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transform:translateX(400px);
+  opacity:0;
+  transition:all 0.3s ease;
+  min-width:300px;
+}
+.toast.show{ transform:translateX(0); opacity:1; }
+.toast.success{ border-color:rgba(34,197,94,0.3); }
+.toast.error{ border-color:rgba(239,68,68,0.3); }
+.toast .icon{ font-size:22px; }
+.toast .content{ flex:1; }
+.toast .title{ font-weight:600; font-size:14px; }
+.toast .message{ font-size:13px; color:var(--muted); margin-top:2px; }
+
+/* Duplicate warning */
+.duplicate-warning{
+  background:rgba(251,191,36,0.1);
+  border:1px solid rgba(251,191,36,0.3);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:16px;
+  display:none;
+  align-items:center;
+  gap:12px;
+}
+.duplicate-warning.show{ display:flex; }
+.duplicate-warning .icon{ font-size:20px; }
+.duplicate-warning .text{ flex:1; }
+.duplicate-warning .title{ font-weight:600; font-size:13px; color:var(--warning); }
+.duplicate-warning .desc{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Quick sidebar */
+.quick-sidebar{
+  width:220px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.mini-card{
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:18px;
+}
+.mini-card h3{ margin:0 0 14px 0; font-size:14px; font-weight:700; }
+.quick-btn{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition:all 0.2s;
+}
+.quick-btn:last-child{ margin-bottom:0; }
+.quick-btn.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#041018; }
+.quick-btn.primary:hover{ transform:translateY(-2px); }
+.quick-btn.secondary{ background:rgba(255,255,255,0.06); color:#cfe8d6; }
+.quick-btn.secondary:hover{ background:rgba(255,255,255,0.1); }
+.quick-btn.purple{ background:linear-gradient(90deg,var(--purple),#c084fc); color:#fff; }
+.quick-btn.purple:hover{ transform:translateY(-2px); }
+
+/* Responsive */
+@media (max-width:1300px){
+  .stats-row{ grid-template-columns:repeat(3, 1fr); }
+  .quick-sidebar{ display:none; }
+}
+@media (max-width:900px){
+  .stats-row{ grid-template-columns:repeat(2, 1fr); }
+  .form-row, .form-row.three{ grid-template-columns:1fr; }
+  .line-item{ grid-template-columns:1fr 1fr; }
+  .smart-summary .grid{ grid-template-columns:repeat(2, 1fr); }
+}
+@media (max-width:768px){
+  .sidebar{ display:none; }
+  .stats-row{ grid-template-columns:1fr; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-animation"></div>
+
+<div class="page-frame">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-dot">E</div>
+        Everest Admin
+      </div>
+      
+      <div class="searchbox">🔍 Search anything...</div>
+
+      <nav class="menu">
+        <div class="section">Dashboards</div>
+        <a href="admin.html"><span class="icon">📊</span> Overview</a>
+        <a href="accounts.html"><span class="icon">👥</span> Accounts</a>
+        <a href="analytics.html"><span class="icon">📈</span> Analytics</a>
+        <a class="active" href="invoices.html"><span class="icon">🧾</span> Invoices</a>
+        
+        <div class="section">Management</div>
+        <a href="#"><span class="icon">💬</span> Messages</a>
+        <a href="#"><span class="icon">⭐</span> Reviews</a>
+      </nav>
+
+      <div class="live-indicator">
+        <div class="status">
+          <div class="pulse"></div>
+          <span>System Online</span>
+        </div>
+        <div class="company">Everest Security Pvt. Ltd.</div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <section class="center">
+
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin.html">Dashboard</a> / <span style="color:#fff;">Invoices</span>
+          </div>
+          <h1>Invoice Generator Pro</h1>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-purple" onclick="openSmartBulkModal()">🚀 Smart Bulk</button>
+          <button class="btn-secondary" onclick="openBulkModal()">📋 Bulk Generate</button>
+          <button class="btn-primary" onclick="openTemplateModal()">+ New Template</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card positive" onclick="showRevenueBreakdown()">
+          <div class="label">Total Revenue</div>
+          <div class="value" id="totalRevenue">$0</div>
+          <div class="change up"><span>↗</span> +12.5% this month</div>
+        </div>
+        <div class="stat-card info" onclick="showInvoiceBreakdown()">
+          <div class="label">Total Invoices</div>
+          <div class="value" id="totalInvoices">0</div>
+          <div class="change" style="color:var(--muted);">All time</div>
+        </div>
+        <div class="stat-card warning" onclick="showPendingBreakdown()">
+          <div class="label">Pending</div>
+          <div class="value" id="pendingAmount">$0</div>
+          <div class="change" style="color:var(--warning);">Awaiting payment</div>
+        </div>
+        <div class="stat-card danger" onclick="showOverdueBreakdown()">
+          <div class="label">Overdue</div>
+          <div class="value" id="overdueAmount">$0</div>
+          <div class="change" style="color:var(--danger);">Action needed</div>
+        </div>
+        <div class="stat-card purple" onclick="showRecurringBreakdown()">
+          <div class="label">Recurring</div>
+          <div class="value" id="recurringCount">0</div>
+          <div class="change" style="color:var(--purple);">Auto-generated</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('templates', this)">Templates</button>
+          <button class="tab" onclick="switchTab('invoices', this)">All Invoices</button>
+          <button class="tab" onclick="switchTab('recurring', this)">Recurring</button>
+          <button class="tab" onclick="switchTab('analytics', this)">Analytics</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-icon" onclick="refreshData()" title="Refresh">🔄</button>
+          <button class="btn-icon" onclick="exportData()" title="Export">📥</button>
+        </div>
+      </div>
+
+      <!-- TEMPLATES PANEL -->
+      <div id="templatesPanel" class="content-panel active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <p style="color:var(--muted); font-size:13px; margin:0;">
+            <span style="color:var(--accent);">💡 Tip:</span> Edit any template to automatically update all linked invoices!
+          </p>
+        </div>
+        <div class="templates-grid" id="templatesGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- INVOICES PANEL -->
+      <div id="invoicesPanel" class="content-panel">
+        <div class="table-panel">
+          <div class="table-header">
+            <div style="font-size:15px; font-weight:700;">All Invoices</div>
+            <div class="table-filters">
+              <input type="text" class="search-input" id="invoiceSearch" placeholder="Search invoices..." onkeyup="filterInvoices()">
+              <select class="filter-select" id="invoiceStatusFilter" onchange="filterInvoices()">
+                <option value="">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="overdue">Overdue</option>
+                <option value="draft">Draft</option>
+              </select>
+              <select class="filter-select" id="invoiceDateFilter" onchange="filterInvoices()">
+                <option value="">All Time</option>
+                <option value="thisMonth">This Month</option>
+                <option value="lastMonth">Last Month</option>
+                <option value="thisQuarter">This Quarter</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Template</th>
+                  <th style="width:140px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoicesTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECURRING PANEL -->
+      <div id="recurringPanel" class="content-panel">
+        <div class="table-panel">
+          <div class="table-header">
+            <div style="font-size:15px; font-weight:700;">Recurring Invoice Schedules</div>
+            <button class="btn-primary" onclick="openRecurringModal()">+ New Schedule</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Template</th>
+                  <th>Frequency</th>
+                  <th>Next Invoice</th>
+                  <th>Amount</th>
+                  <th>Generated</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recurringTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS PANEL -->
+      <div id="analyticsPanel" class="content-panel">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>📈 Revenue Overview</h3>
+            <div class="chart-period">
+              <button class="period-btn active" onclick="updateChart('7d', this)">7 Days</button>
+              <button class="period-btn" onclick="updateChart('30d', this)">30 Days</button>
+              <button class="period-btn" onclick="updateChart('90d', this)">90 Days</button>
+              <button class="period-btn" onclick="updateChart('1y', this)">1 Year</button>
+            </div>
+          </div>
+          <canvas id="revenueChart" height="100"></canvas>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3>🥧 Payment Status</h3>
+            </div>
+            <canvas id="statusChart" height="150"></canvas>
+          </div>
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3>🏆 Top Clients</h3>
+            </div>
+            <canvas id="clientsChart" height="150"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Quick Sidebar -->
+    <aside class="quick-sidebar">
+      
+      <div class="mini-card">
+        <h3>⚡ Quick Actions</h3>
+        <button class="quick-btn primary" onclick="openTemplateModal()">✚ Create Template</button>
+        <button class="quick-btn purple" onclick="openSmartBulkModal()">🚀 Smart Bulk</button>
+        <button class="quick-btn secondary" onclick="openBulkModal()">📋 Bulk Generate</button>
+        <button class="quick-btn secondary" onclick="exportAllInvoices()">📥 Export All</button>
+      </div>
+
+      <div class="mini-card">
+        <h3>📊 This Month</h3>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; color:var(--muted);">Generated</span>
+            <span style="font-size:14px; font-weight:700; color:var(--accent);">47</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; color:var(--muted);">Paid</span>
+            <span style="font-size:14px; font-weight:700; color:var(--info);">38</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; color:var(--muted);">Pending</span>
+            <span style="font-size:14px; font-weight:700; color:var(--warning);">9</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <h3>⚠️ Needs Attention</h3>
+        <div id="attentionList" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<!-- TEMPLATE EDITOR MODAL -->
+<div id="templateModal" class="modal-overlay">
+  <div class="modal wide">
+    <div class="modal-header">
+      <h2 id="templateModalTitle">Create Invoice Template</h2>
+      <button class="modal-close" onclick="closeTemplateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="templateForm">
+        <input type="hidden" name="templateId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Template Name *</label>
+            <input type="text" name="templateName" required placeholder="e.g., Standard Monthly">
+          </div>
+          <div class="form-group">
+            <label>Default Due Days *</label>
+            <input type="number" name="dueDays" required value="30" min="1">
+          </div>
+        </div>
+        
+        <div class="line-items">
+          <div class="line-item-header">
+            <span>Description</span>
+            <span>Qty</span>
+            <span>Price</span>
+            <span>Total</span>
+            <span></span>
+          </div>
+          <div id="lineItemsContainer">
+            <!-- Line items added here -->
+          </div>
+          <button type="button" class="add-line-btn" onclick="addLineItem()">+ Add Line Item</button>
+        </div>
+
+        <div class="form-row three" style="margin-top:16px;">
+          <div class="form-group">
+            <label>Tax Rate (%)</label>
+            <input type="number" name="taxRate" value="0" min="0" max="100" step="0.01" onchange="updatePreview()">
+          </div>
+          <div class="form-group">
+            <label>Discount (%)</label>
+            <input type="number" name="discountRate" value="0" min="0" max="100" step="0.01" onchange="updatePreview()">
+          </div>
+          <div class="form-group">
+            <label>Currency</label>
+            <select name="currency">
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Terms</label>
+          <textarea name="notes">Payment is due within 30 days. Thank you for choosing Everest Security!</textarea>
+        </div>
+
+        <div class="totals-box">
+          <div class="row"><span>Subtotal:</span><span id="previewSubtotal">$0.00</span></div>
+          <div class="row"><span>Tax (<span id="previewTaxRate">0</span>%):</span><span id="previewTax">$0.00</span></div>
+          <div class="row"><span>Discount (<span id="previewDiscountRate">0</span>%):</span><span id="previewDiscount">-$0.00</span></div>
+          <div class="row total"><span>Total:</span><span class="amount" id="previewTotal">$0.00</span></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeTemplateModal()">Cancel</button>
+      <button class="btn-secondary" onclick="saveTemplateAsDraft()">Save as Draft</button>
+      <button class="btn-primary" onclick="saveTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- SMART BULK MODAL -->
+<div id="smartBulkModal" class="modal-overlay">
+  <div class="modal xl">
+    <div class="modal-header">
+      <h2>🚀 Smart Bulk Invoice Generator</h2>
+      <button class="modal-close" onclick="closeSmartBulkModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Select Template *</label>
+          <select id="smartBulkTemplate" onchange="updateSmartBulkPreview()">
+            <option value="">Choose template...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Invoice Date *</label>
+          <input type="date" id="smartBulkDate" onchange="updateSmartBulkPreview()">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div>
+          <label style="display:block; color:var(--muted); font-size:12px; margin-bottom:10px;">Select Clients by Payment Term</label>
+          <div class="client-selector" id="smartClientSelector">
+            <!-- Populated by JS - grouped by payment term -->
+          </div>
+        </div>
+        
+        <div>
+          <div class="smart-summary" id="smartSummary">
+            <div class="title">📊 Selection Summary</div>
+            <div class="grid">
+              <div class="item">
+                <div class="value" id="summaryCount">0</div>
+                <div class="label">Clients</div>
+              </div>
+              <div class="item">
+                <div class="value" id="summaryMonthly">$0</div>
+                <div class="label">Monthly</div>
+              </div>
+              <div class="item">
+                <div class="value" id="summaryTotal">$0</div>
+                <div class="label">Total Value</div>
+              </div>
+              <div class="item">
+                <div class="value" id="summaryTerms">0</div>
+                <div class="label">Terms</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top:20px; padding:16px; background:var(--glass); border-radius:12px;">
+            <div style="font-weight:600; margin-bottom:12px;">💡 Smart Features</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.8;">
+              <div>✓ Auto-detects duplicate invoices</div>
+              <div>✓ Groups by payment terms</div>
+              <div>✓ Shows real-time totals</div>
+              <div>✓ One-click select by term</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeSmartBulkModal()">Cancel</button>
+      <button class="btn-primary" onclick="generateSmartBulkInvoices()">
+        Generate <span id="smartBulkBtnCount">0</span> Invoices
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- REGULAR BULK MODAL -->
+<div id="bulkModal" class="modal-overlay">
+  <div class="modal wide">
+    <div class="modal-header">
+      <h2>📋 Bulk Generate Invoices</h2>
+      <button class="modal-close" onclick="closeBulkModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Select Template *</label>
+          <select id="bulkTemplate" onchange="updateBulkPreview()">
+            <option value="">Choose template...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Invoice Date *</label>
+          <input type="date" id="bulkDate" onchange="updateBulkPreview()">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Select Clients</label>
+        <div class="client-selector" id="bulkClientSelector">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div style="background:var(--glass); padding:16px; border-radius:12px; margin-top:16px;">
+        <div style="font-weight:600; margin-bottom:10px;">Bulk Preview</div>
+        <div id="bulkPreview" style="color:var(--muted); font-size:13px;">
+          Select a template and clients to see preview
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeBulkModal()">Cancel</button>
+      <button class="btn-primary" onclick="generateBulkInvoices()">Generate <span id="bulkBtnCount">0</span> Invoices</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE SINGLE INVOICE MODAL -->
+<div id="generateModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Generate Invoice</h2>
+      <button class="modal-close" onclick="closeGenerateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="duplicate-warning" id="duplicateWarning">
+        <span class="icon">⚠</span>
+        <div class="text">
+          <div class="title">Duplicate Invoice Detected</div>
+          <div class="desc">An invoice for this client already exists for this period.</div>
+        </div>
+      </div>
+      
+      <form id="generateForm">
+        <input type="hidden" name="templateId">
+        <div class="form-group">
+          <label>Select Client *</label>
+          <select name="clientId" required onchange="checkDuplicate()">
+            <option value="">Choose a client...</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Invoice Date *</label>
+            <input type="date" name="invoiceDate" required onchange="checkDuplicate()">
+          </div>
+          <div class="form-group">
+            <label>Due Date *</label>
+            <input type="date" name="dueDate" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Invoice Number</label>
+          <input type="text" name="invoiceNumber" id="autoInvoiceNumber" readonly style="opacity:0.7;">
+        </div>
+        <div class="form-group">
+          <label>Custom Price Override (optional)</label>
+          <input type="number" name="customPrice" placeholder="Leave empty to use template price" step="0.01">
+        </div>
+      </form>
+
+      <div class="invoice-preview" id="invoicePreview" style="display:none;">
+        <!-- Preview populated by JS -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeGenerateModal()">Cancel</button>
+      <button class="btn-secondary" onclick="previewInvoice()">👁 Preview</button>
+      <button class="btn-primary" onclick="generateInvoice()">Generate Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW INVOICE MODAL -->
+<div id="viewInvoiceModal" class="modal-overlay">
+  <div class="modal wide">
+    <div class="modal-header">
+      <h2>Invoice Details</h2>
+      <button class="modal-close" onclick="closeViewInvoiceModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="viewInvoiceContent">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeViewInvoiceModal()">Close</button>
+      <button class="btn-secondary" onclick="downloadInvoicePDF()">📄 Download PDF</button>
+      <button class="btn-primary" onclick="markAsPaid()">✓ Mark as Paid</button>
+      <button class="btn-purple" onclick="sendInvoice()">✉ Send to Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ==================== DATA ====================
+
+// Templates - YOUR EXISTING 12-YEAR TEMPLATE SYSTEM
+let templates = [
+  {
+    id: 1,
+    name: "Everest Standard Security",
+    description: "Monthly security monitoring, threat detection, and 24/7 support",
+    status: "active",
+    dueDays: 30,
+    lineItems: [
+      { description: "Security Monitoring Service", quantity: 1, unitPrice: 299.99 },
+      { description: "Threat Detection & Response", quantity: 1, unitPrice: 149.99 }
+    ],
+    taxRate: 8.5,
+    discountRate: 0,
+    currency: "USD",
+    notes: "Payment is due within 30 days. Late fees apply after 45 days. Thank you for choosing Everest Security!",
+    linkedInvoices: 47,
+    createdDate: "2012-03-15",
+    featured: true
+  },
+  {
+    id: 2,
+    name: "Enterprise Protection Plan",
+    description: "Full enterprise suite with dedicated support team",
+    status: "active",
+    dueDays: 15,
+    lineItems: [
+      { description: "Enterprise Security Suite", quantity: 1, unitPrice: 999.99 },
+      { description: "24/7 Dedicated Support", quantity: 1, unitPrice: 499.99 },
+      { description: "Penetration Testing (Quarterly)", quantity: 1, unitPrice: 2500.00 }
+    ],
+    taxRate: 8.5,
+    discountRate: 10,
+    currency: "USD",
+    notes: "Net 15 payment terms. 10% early payment discount available.",
+    linkedInvoices: 12,
+    createdDate: "2015-08-20",
+    featured: false
+  },
+  {
+    id: 3,
+    name: "Basic Business Shield",
+    description: "Essential protection for small businesses",
+    status: "active",
+    dueDays: 30,
+    lineItems: [
+      { description: "Basic Security Package", quantity: 1, unitPrice: 99.99 }
+    ],
+    taxRate: 8.5,
+    discountRate: 0,
+    currency: "USD",
+    notes: "Monthly billing. Cancel anytime with 30-day notice.",
+    linkedInvoices: 89,
+    createdDate: "2018-01-10",
+    featured: false
+  },
+  {
+    id: 4,
+    name: "Custom Quote Template",
+    description: "For project-based or custom pricing",
+    status: "draft",
+    dueDays: 45,
+    lineItems: [],
+    taxRate: 8.5,
+    discountRate: 0,
+    currency: "USD",
+    notes: "Custom project invoice. Please review all line items carefully.",
+    linkedInvoices: 0,
+    createdDate: "2024-01-01",
+    featured: false
+  }
+];
+
+// Clients with payment terms
+let clients = [
+  { id: 1, name: "TechCorp Solutions", email: "billing@techcorp.com", price: 449.98, paymentTerm: "monthly", termLabel: "Monthly" },
+  { id: 2, name: "Global Finance Ltd", email: "accounts@globalfin.com", price: 4499.98, paymentTerm: "quarterly", termLabel: "Quarterly" },
+  { id: 3, name: "RetailMax Stores", email: "finance@retailmax.com", price: 99.99, paymentTerm: "monthly", termLabel: "Monthly" },
+  { id: 4, name: "HealthFirst Medical", email: "billing@healthfirst.com", price: 2699.98, paymentTerm: "6months", termLabel: "6 Months" },
+  { id: 5, name: "EduLearn Academy", email: "accounts@edulearn.com", price: 1199.88, paymentTerm: "annual", termLabel: "Annual" },
+  { id: 6, name: "Manufacturing Pro", email: "finance@manupro.com", price: 4499.98, paymentTerm: "quarterly", termLabel: "Quarterly" },
+  { id: 7, name: "CloudNine Services", email: "billing@cloudnine.io", price: 449.98, paymentTerm: "monthly", termLabel: "Monthly" },
+  { id: 8, name: "SecureBank Inc", email: "accounts@securebank.com", price: 5399.88, paymentTerm: "annual", termLabel: "Annual" },
+  { id: 9, name: "Digital Marketing Co", email: "team@digimark.com", price: 2699.98, paymentTerm: "6months", termLabel: "6 Months" },
+  { id: 10, name: "Logistics Express", email: "dispatch@logiex.com", price: 4499.98, paymentTerm: "quarterly", termLabel: "Quarterly" },
+  { id: 11, name: "SmartRetail Chain", email: "finance@smartretail.com", price: 99.99, paymentTerm: "monthly", termLabel: "Monthly" },
+  { id: 12, name: "MedCare Hospital", email: "billing@medcare.com", price: 2699.98, paymentTerm: "6months", termLabel: "6 Months" }
+];
+
+// Invoices
+let invoices = [
+  { id: 1, number: "INV-2024-001", clientId: 1, templateId: 1, date: "2024-12-01", dueDate: "2024-12-31", amount: 488.22, status: "paid", items: [{description: "Security Monitoring Service", quantity: 1, unitPrice: 299.99}, {description: "Threat Detection & Response", quantity: 1, unitPrice: 149.99}], tax: 38.24, discount: 0 },
+  { id: 2, number: "INV-2024-002", clientId: 2, templateId: 2, date: "2024-12-05", dueDate: "2024-12-20", amount: 6749.95, status: "pending", items: [{description: "Enterprise Security Suite", quantity: 1, unitPrice: 999.99}, {description: "24/7 Dedicated Support", quantity: 1, unitPrice: 499.99}, {description: "Penetration Testing (Quarterly)", quantity: 1, unitPrice: 2500.00}], tax: 573.75, discount: 750.00 },
+  { id: 3, number: "INV-2024-003", clientId: 3, templateId: 3, date: "2024-11-15", dueDate: "2024-12-15", amount: 108.49, status: "overdue", items: [{description: "Basic Security Package", quantity: 1, unitPrice: 99.99}], tax: 8.50, discount: 0 },
+  { id: 4, number: "INV-2024-004", clientId: 4, templateId: 1, date: "2024-12-10", dueDate: "2025-01-09", amount: 488.22, status: "pending", items: [{description: "Security Monitoring Service", quantity: 1, unitPrice: 299.99}, {description: "Threat Detection & Response", quantity: 1, unitPrice: 149.99}], tax: 38.24, discount: 0 },
+  { id: 5, number: "INV-2024-005", clientId: 5, templateId: 3, date: "2024-12-12", dueDate: "2025-01-11", amount: 108.49, status: "draft", items: [{description: "Basic Security Package", quantity: 1, unitPrice: 99.99}], tax: 8.50, discount: 0 },
+  { id: 6, number: "INV-2024-006", clientId: 6, templateId: 2, date: "2024-11-01", dueDate: "2024-11-16", amount: 6749.95, status: "overdue", items: [{description: "Enterprise Security Suite", quantity: 1, unitPrice: 999.99}, {description: "24/7 Dedicated Support", quantity: 1, unitPrice: 499.99}, {description: "Penetration Testing (Quarterly)", quantity: 1, unitPrice: 2500.00}], tax: 573.75, discount: 750.00 },
+  { id: 7, number: "INV-2024-007", clientId: 7, templateId: 1, date: "2024-12-15", dueDate: "2025-01-14", amount: 488.22, status: "pending", items: [{description: "Security Monitoring Service", quantity: 1, unitPrice: 299.99}, {description: "Threat Detection & Response", quantity: 1, unitPrice: 149.99}], tax: 38.24, discount: 0 },
+  { id: 8, number: "INV-2024-008", clientId: 8, templateId: 2, date: "2024-12-01", dueDate: "2024-12-16", amount: 6749.95, status: "paid", items: [{description: "Enterprise Security Suite", quantity: 1, unitPrice: 999.99}, {description: "24/7 Dedicated Support", quantity: 1, unitPrice: 499.99}, {description: "Penetration Testing (Quarterly)", quantity: 1, unitPrice: 2500.00}], tax: 573.75, discount: 750.00 }
+];
+
+let recurringSchedules = [
+  { id: 1, clientId: 1, templateId: 1, frequency: "monthly", startDate: "2024-01-01", nextDate: "2025-01-01", endDate: null, generated: 12, status: "active" },
+  { id: 2, clientId: 2, templateId: 2, frequency: "quarterly", startDate: "2024-02-01", nextDate: "2025-02-01", endDate: null, generated: 4, status: "active" },
+  { id: 3, clientId: 4, templateId: 1, frequency: "6months", startDate: "2024-03-01", nextDate: "2025-03-01", endDate: "2025-12-31", generated: 2, status: "active" },
+  { id: 4, clientId: 6, templateId: 2, frequency: "yearly", startDate: "2024-06-01", nextDate: "2025-06-01", endDate: null, generated: 1, status: "paused" }
+];
+
+let currentTemplateId = null;
+let currentInvoiceId = null;
+let editingTemplate = false;
+let selectedSmartClients = new Set();
+
+// ==================== INITIALIZATION ====================
+
+function init() {
+  renderTemplates();
+  renderInvoices();
+  renderRecurring();
+  updateStats();
+  initCharts();
+  populateSelects();
+  renderAttentionList();
+  populateSmartBulkClients();
+  
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('smartBulkDate').value = today;
+  document.getElementById('bulkDate').value = today;
+  document.querySelector('input[name="invoiceDate"]').value = today;
+  
+  // Simulate real-time updates
+  setInterval(simulateRealTimeUpdates, 5000);
+}
+
+function simulateRealTimeUpdates() {
+  // Randomly update stats
+  const revenue = parseFloat(document.getElementById('totalRevenue').textContent.replace(/[$,]/g, ''));
+  const change = (Math.random() - 0.4) * 100;
+  document.getElementById('totalRevenue').textContent = '$' + Math.floor(revenue + change).toLocaleString();
+}
+
+// ==================== STATS ====================
+
+function updateStats() {
+  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
+  const pendingAmount = invoices.filter(i => i.status === 'pending').reduce((sum, i) => sum + i.amount, 0);
+  const overdueAmount = invoices.filter(i => i.status === 'overdue').reduce((sum, i) => sum + i.amount, 0);
+  
+  document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalInvoices').textContent = invoices.length;
+  document.getElementById('pendingAmount').textContent = '$' + pendingAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('overdueAmount').textContent = '$' + overdueAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('recurringCount').textContent = recurringSchedules.filter(r => r.status === 'active').length;
+}
+
+// ==================== TEMPLATES ====================
+
+function renderTemplates() {
+  const grid = document.getElementById('templatesGrid');
+  
+  grid.innerHTML = templates.map(t => `
+    <div class="template-card ${t.featured ? 'featured' : ''} ${t.status === 'draft' ? '' : ''}" data-id="${t.id}">
+      <span class="badge ${t.status}">${t.status}</span>
+      <div class="template-name">${t.name}</div>
+      <div class="template-desc">${t.description}</div>
+      <div class="template-total">$${calculateTemplateTotal(t).toFixed(2)}<span style="font-size:14px; color:var(--muted); font-weight:400;">/invoice</span></div>
+      <div class="template-meta">
+        <span>📄 ${t.linkedInvoices} linked</span>
+        <span>⏰ Net ${t.dueDays}</span>
+        <span>${t.currency}</span>
+      </div>
+      <div class="template-actions">
+        <button class="btn-use" onclick="openGenerateModal(${t.id})">Use Template</button>
+        <button class="btn-edit" onclick="editTemplate(${t.id})">Edit</button>
+      </div>
+    </div>
+  `).join('') + `
+    <div class="template-card add-template" onclick="openTemplateModal()">
+      <div class="plus">+</div>
+      <span>Create New Template</span>
+    </div>
+  `;
+}
+
+function calculateTemplateTotal(template) {
+  const subtotal = template.lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const tax = subtotal * (template.taxRate / 100);
+  const discount = subtotal * (template.discountRate / 100);
+  return subtotal + tax - discount;
+}
+
+// ==================== SMART BULK - THE KEY FEATURE ====================
+
+function openSmartBulkModal() {
+  document.getElementById('smartBulkModal').classList.add('show');
+  populateSmartBulkTemplates();
+  updateSmartBulkPreview();
+}
+
+function closeSmartBulkModal() {
+  document.getElementById('smartBulkModal').classList.remove('show');
+}
+
+function populateSmartBulkTemplates() {
+  const select = document.getElementById('smartBulkTemplate');
+  select.innerHTML = '<option value="">Choose template...</option>' +
+    templates.filter(t => t.status === 'active').map(t => 
+      `<option value="${t.id}">${t.name} - $${calculateTemplateTotal(t).toFixed(2)}</option>`
+    ).join('');
+}
+
+function populateSmartBulkClients() {
+  const container = document.getElementById('smartClientSelector');
+  
+  // Group clients by payment term
+  const grouped = {
+    monthly: clients.filter(c => c.paymentTerm === 'monthly'),
+    quarterly: clients.filter(c => c.paymentTerm === 'quarterly'),
+    '6months': clients.filter(c => c.paymentTerm === '6months'),
+    annual: clients.filter(c => c.paymentTerm === 'annual')
+  };
+  
+  const termLabels = {
+    monthly: 'Monthly Payers',
+    quarterly: 'Quarterly Payers',
+    '6months': '6-Month Payers',
+    annual: 'Annual Payers'
+  };
+  
+  let html = '';
+  
+  for (const [term, termClients] of Object.entries(grouped)) {
+    if (termClients.length === 0) continue;
+    
+    html += `
+      <div class="term-section">
+        <div class="term-header" onclick="toggleTermSection('${term}')">
+          <input type="checkbox" id="term-${term}" onchange="selectAllByTerm('${term}', this.checked)" onclick="event.stopPropagation()">
+          <span class="term-name">${termLabels[term]}</span>
+          <span class="term-count">${termClients.length} clients</span>
+        </div>
+        <div class="term-clients" id="term-clients-${term}">
+          ${termClients.map(c => `
+            <div class="client-option" onclick="toggleSmartClient(${c.id})">
+              <input type="checkbox" ${selectedSmartClients.has(c.id) ? 'checked' : ''} onchange="event.stopPropagation()" id="smart-client-${c.id}">
+              <div class="client-info">
+                <div class="client-name">${c.name}</div>
+                <div class="client-email">${c.email}</div>
+              </div>
+              <div class="client-price">$${c.price.toFixed(2)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+}
+
+function toggleTermSection(term) {
+  const section = document.getElementById(`term-clients-${term}`);
+  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectAllByTerm(term, checked) {
+  const termClients = clients.filter(c => c.paymentTerm === term);
+  termClients.forEach(c => {
+    if (checked) {
+      selectedSmartClients.add(c.id);
+    } else {
+      selectedSmartClients.delete(c.id);
+    }
+    const cb = document.getElementById(`smart-client-${c.id}`);
+    if (cb) cb.checked = checked;
+  });
+  updateSmartBulkPreview();
+}
+
+function toggleSmartClient(id) {
+  const cb = document.getElementById(`smart-client-${id}`);
+  cb.checked = !cb.checked;
+  
+  if (cb.checked) {
+    selectedSmartClients.add(id);
+  } else {
+    selectedSmartClients.delete(id);
+  }
+  updateSmartBulkPreview();
+}
+
+function updateSmartBulkPreview() {
+  const count = selectedSmartClients.size;
+  const selectedClientData = clients.filter(c => selectedSmartClients.has(c.id));
+  
+  const monthly = selectedClientData.filter(c => c.paymentTerm === 'monthly').reduce((sum, c) => sum + c.price, 0);
+  const total = selectedClientData.reduce((sum, c) => sum + c.price, 0);
+  const uniqueTerms = new Set(selectedClientData.map(c => c.paymentTerm)).size;
+  
+  document.getElementById('summaryCount').textContent = count;
+  document.getElementById('summaryMonthly').textContent = '$' + monthly.toFixed(0);
+  document.getElementById('summaryTotal').textContent = '$' + total.toFixed(0);
+  document.getElementById('summaryTerms').textContent = uniqueTerms;
+  document.getElementById('smartBulkBtnCount').textContent = count;
+}
+
+function generateSmartBulkInvoices() {
+  const templateId = parseInt(document.getElementById('smartBulkTemplate').value);
+  const date = document.getElementById('smartBulkDate').value;
+  
+  if (!templateId || !date || selectedSmartClients.size === 0) {
+    showToast('error', 'Missing Information', 'Please select template, date, and at least one client');
+    return;
+  }
+  
+  const template = templates.find(t => t.id === templateId);
+  let count = 0;
+  
+  selectedSmartClients.forEach(clientId => {
+    const client = clients.find(c => c.id === clientId);
+    const subtotal = template.lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    const tax = subtotal * (template.taxRate / 100);
+    const discount = subtotal * (template.discountRate / 100);
+    
+    invoices.push({
+      id: Date.now() + count,
+      number: generateInvoiceNumber(),
+      clientId: clientId,
+      templateId: templateId,
+      date: date,
+      dueDate: new Date(new Date(date).getTime() + template.dueDays * 86400000).toISOString().split('T')[0],
+      amount: subtotal + tax - discount,
+      status: 'draft',
+      items: [...template.lineItems],
+      tax: tax,
+      discount: discount
+    });
+    count++;
+  });
+  
+  // Update template linked count
+  const tIndex = templates.findIndex(t => t.id === templateId);
+  templates[tIndex].linkedInvoices += count;
+  
+  renderTemplates();
+  renderInvoices();
+  updateStats();
+  closeSmartBulkModal();
+  selectedSmartClients.clear();
+  showToast('success', 'Invoices Generated', `${count} invoices created successfully!`);
+}
+
+// ==================== OTHER FUNCTIONS (condensed) ====================
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tab + 'Panel').classList.add('active');
+}
+
+function openTemplateModal() {
+  editingTemplate = false;
+  document.getElementById('templateModalTitle').textContent = 'Create Invoice Template';
+  document.getElementById('templateForm').reset();
+  document.getElementById('lineItemsContainer').innerHTML = '';
+  addLineItem();
+  updatePreview();
+  document.getElementById('templateModal').classList.add('show');
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('show');
+}
+
+function addLineItem(desc = '', qty = 1, price = '') {
+  const container = document.getElementById('lineItemsContainer');
+  const div = document.createElement('div');
+  div.className = 'line-item';
+  div.innerHTML = `
+    <input type="text" placeholder="Description" class="li-desc" value="${desc}" onchange="updatePreview()">
+    <input type="number" placeholder="Qty" class="li-qty" value="${qty}" min="1" onchange="updatePreview()">
+    <input type="number" placeholder="Price" class="li-price" value="${price}" step="0.01" onchange="updatePreview()">
+    <input type="text" placeholder="Total" class="li-total" readonly style="opacity:0.6;">
+    <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updatePreview();">&times;</button>
+  `;
+  container.appendChild(div);
+  updatePreview();
+}
+
+function updatePreview() {
+  let subtotal = 0;
+  document.querySelectorAll('.line-item').forEach(row => {
+    const qty = parseFloat(row.querySelector('.li-qty').value) || 0;
+    const price = parseFloat(row.querySelector('.li-price').value) || 0;
+    const total = qty * price;
+    row.querySelector('.li-total').value = '$' + total.toFixed(2);
+    subtotal += total;
+  });
+  
+  const taxRate = parseFloat(document.querySelector('input[name="taxRate"]').value) || 0;
+  const discountRate = parseFloat(document.querySelector('input[name="discountRate"]').value) || 0;
+  
+  const tax = subtotal * (taxRate / 100);
+  const discount = subtotal * (discountRate / 100);
+  const total = subtotal + tax - discount;
+  
+  document.getElementById('previewSubtotal').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('previewTaxRate').textContent = taxRate;
+  document.getElementById('previewTax').textContent = '$' + tax.toFixed(2);
+  document.getElementById('previewDiscountRate').textContent = discountRate;
+  document.getElementById('previewDiscount').textContent = '-$' + discount.toFixed(2);
+  document.getElementById('previewTotal').textContent = '$' + total.toFixed(2);
+}
+
+function saveTemplate() {
+  const form = document.getElementById('templateForm');
+  const lineItems = [];
+  
+  document.querySelectorAll('.line-item').forEach(row => {
+    const desc = row.querySelector('.li-desc').value;
+    const qty = parseFloat(row.querySelector('.li-qty').value) || 0;
+    const price = parseFloat(row.querySelector('.li-price').value) || 0;
+    if (desc) lineItems.push({ description: desc, quantity: qty, unitPrice: price });
+  });
+  
+  const templateData = {
+    id: editingTemplate ? currentTemplateId : Date.now(),
+    name: form.templateName.value,
+    description: lineItems.map(i => i.description).join(', ').substring(0, 60) || 'Custom template',
+    status: 'active',
+    dueDays: parseInt(form.dueDays.value),
+    lineItems: lineItems,
+    taxRate: parseFloat(form.taxRate.value) || 0,
+    discountRate: parseFloat(form.discountRate.value) || 0,
+    currency: form.currency.value,
+    notes: form.notes.value,
+    linkedInvoices: editingTemplate ? templates.find(t => t.id === currentTemplateId)?.linkedInvoices || 0 : 0,
+    createdDate: new Date().toISOString().split('T')[0],
+    featured: false
+  };
+  
+  if (editingTemplate) {
+    const index = templates.findIndex(t => t.id === currentTemplateId);
+    const oldTemplate = templates[index];
+    templates[index] = templateData;
+    
+    // Update all linked invoices
+    let updatedCount = 0;
+    invoices = invoices.map(inv => {
+      if (inv.templateId === currentTemplateId) {
+        updatedCount++;
+        const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+        const tax = subtotal * (templateData.taxRate / 100);
+        const discount = subtotal * (templateData.discountRate / 100);
+        return { ...inv, items: lineItems, amount: subtotal + tax - discount, tax, discount };
+      }
+      return inv;
+    });
+    
+    showToast('success', 'Template Updated', `${updatedCount} linked invoices refreshed!`);
+  } else {
+    templates.push(templateData);
+    showToast('success', 'Template Created', 'New template saved successfully!');
+  }
+  
+  renderTemplates();
+  closeTemplateModal();
+}
+
+function editTemplate(id) {
+  editingTemplate = true;
+  currentTemplateId = id;
+  const template = templates.find(t => t.id === id);
+  if (!template) return;
+  
+  document.getElementById('templateModalTitle').textContent = `Edit Template (${template.linkedInvoices} linked invoices will update)`;
+  const form = document.getElementById('templateForm');
+  form.templateName.value = template.name;
+  form.dueDays.value = template.dueDays;
+  form.taxRate.value = template.taxRate;
+  form.discountRate.value = template.discountRate;
+  form.currency.value = template.currency;
+  form.notes.value = template.notes;
+  
+  const container = document.getElementById('lineItemsContainer');
+  container.innerHTML = '';
+  template.lineItems.forEach(item => addLineItem(item.description, item.quantity, item.unitPrice));
+  
+  updatePreview();
+  document.getElementById('templateModal').classList.add('show');
+}
+
+function openGenerateModal(templateId) {
+  currentTemplateId = templateId;
+  const template = templates.find(t => t.id === templateId);
+  if (!template) return;
+  
+  document.getElementById('generateForm').templateId.value = templateId;
+  document.getElementById('autoInvoiceNumber').value = generateInvoiceNumber();
+  
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + template.dueDays);
+  document.querySelector('input[name="dueDate"]').valueAsDate = dueDate;
+  
+  document.getElementById('duplicateWarning').classList.remove('show');
+  document.getElementById('invoicePreview').style.display = 'none';
+  document.getElementById('generateModal').classList.add('show');
+}
+
+function closeGenerateModal() {
+  document.getElementById('generateModal').classList.remove('show');
+}
+
+function generateInvoiceNumber() {
+  const year = new Date().getFullYear();
+  const count = invoices.length + 1;
+  return `INV-${year}-${String(count).padStart(3, '0')}`;
+}
+
+function generateInvoice() {
+  const form = document.getElementById('generateForm');
+  const templateId = parseInt(form.templateId.value);
+  const clientId = parseInt(form.clientId.value);
+  const template = templates.find(t => t.id === templateId);
+  
+  if (!clientId || !form.invoiceDate.value) {
+    showToast('error', 'Missing Fields', 'Please fill in all required fields');
+    return;
+  }
+  
+  const subtotal = template.lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const tax = subtotal * (template.taxRate / 100);
+  const discount = subtotal * (template.discountRate / 100);
+  const customPrice = parseFloat(form.customPrice.value);
+  const finalAmount = customPrice || (subtotal + tax - discount);
+  
+  invoices.push({
+    id: Date.now(),
+    number: form.invoiceNumber.value,
+    clientId: clientId,
+    templateId: templateId,
+    date: form.invoiceDate.value,
+    dueDate: form.dueDate.value,
+    amount: finalAmount,
+    status: 'draft',
+    items: [...template.lineItems],
+    tax: tax,
+    discount: discount
+  });
+  
+  const tIndex = templates.findIndex(t => t.id === templateId);
+  templates[tIndex].linkedInvoices++;
+  
+  renderTemplates();
+  renderInvoices();
+  updateStats();
+  closeGenerateModal();
+  showToast('success', 'Invoice Generated', 'Invoice created successfully!');
+}
+
+function renderInvoices(filteredInvoices = null) {
+  const tbody = document.getElementById('invoicesTableBody');
+  const data = filteredInvoices || invoices;
+  
+  tbody.innerHTML = data.map(inv => {
+    const client = clients.find(c => c.id === inv.clientId);
+    const template = templates.find(t => t.id === inv.templateId);
+    return `
+      <tr>
+        <td><span class="invoice-id">${inv.number}</span></td>
+        <td>${client ? client.name : 'Unknown'}</td>
+        <td>${formatDate(inv.date)}</td>
+        <td>${formatDate(inv.dueDate)}</td>
+        <td class="amount">$${inv.amount.toFixed(2)}</td>
+        <td><span class="status-badge status-${inv.status}">${inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}</span></td>
+        <td>${template ? template.name : 'Custom'}</td>
+        <td>
+          <div class="action-btns">
+            <button class="action-btn" onclick="viewInvoice(${inv.id})" title="View">👁</button>
+            <button class="action-btn" onclick="downloadInvoicePDF(${inv.id})" title="PDF">📄</button>
+            <button class="action-btn" onclick="sendInvoice(${inv.id})" title="Send">✉</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterInvoices() {
+  const search = document.getElementById('invoiceSearch').value.toLowerCase();
+  const status = document.getElementById('invoiceStatusFilter').value;
+  
+  const filtered = invoices.filter(inv => {
+    const client = clients.find(c => c.id === inv.clientId);
+    const matchesSearch = inv.number.toLowerCase().includes(search) || (client && client.name.toLowerCase().includes(search));
+    const matchesStatus = !status || inv.status === status;
+    return matchesSearch && matchesStatus;
+  });
+  
+  renderInvoices(filtered);
+}
+
+function viewInvoice(id) {
+  currentInvoiceId = id;
+  const inv = invoices.find(i => i.id === id);
+  const client = clients.find(c => c.id === inv.clientId);
+  const template = templates.find(t => t.id === inv.templateId);
+  
+  document.getElementById('viewInvoiceContent').innerHTML = `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+      <div>
+        <div style="color:var(--muted); font-size:12px; margin-bottom:4px;">Invoice Number</div>
+        <div style="font-size:22px; font-weight:700;">${inv.number}</div>
+      </div>
+      <div style="text-align:right;">
+        <span class="status-badge status-${inv.status}">${inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}</span>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:20px; padding:16px; background:var(--glass); border-radius:12px;">
+      <div><div style="color:var(--muted); font-size:11px; text-transform:uppercase;">Client</div><div style="font-weight:600; margin-top:4px;">${client ? client.name : 'Unknown'}</div></div>
+      <div><div style="color:var(--muted); font-size:11px; text-transform:uppercase;">Invoice Date</div><div style="font-weight:600; margin-top:4px;">${formatDate(inv.date)}</div></div>
+      <div><div style="color:var(--muted); font-size:11px; text-transform:uppercase;">Due Date</div><div style="font-weight:600; margin-top:4px;">${formatDate(inv.dueDate)}</div></div>
+      <div><div style="color:var(--muted); font-size:11px; text-transform:uppercase;">Amount</div><div style="font-weight:600; margin-top:4px; color:var(--accent); font-size:20px;">$${inv.amount.toFixed(2)}</div></div>
+    </div>
+    <table style="width:100%;">
+      <thead><tr style="color:var(--muted);"><th style="text-align:left; padding:10px;">Description</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead>
+      <tbody>${inv.items.map(item => `<tr><td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.04);">${item.description}</td><td style="text-align:center;">${item.quantity}</td><td style="text-align:right;">$${item.unitPrice.toFixed(2)}</td><td style="text-align:right; font-weight:600;">$${(item.quantity * item.unitPrice).toFixed(2)}</td></tr>`).join('')}</tbody>
+    </table>
+    <div style="margin-top:16px; text-align:right;">
+      <div style="font-size:13px; color:var(--muted);">Tax: $${inv.tax.toFixed(2)}</div>
+      <div style="font-size:13px; color:var(--muted);">Discount: $${inv.discount.toFixed(2)}</div>
+      <div style="font-size:22px; font-weight:800; margin-top:10px; color:var(--accent);">Total: $${inv.amount.toFixed(2)}</div>
+    </div>
+  `;
+  
+  document.getElementById('viewInvoiceModal').classList.add('show');
+}
+
+function closeViewInvoiceModal() {
+  document.getElementById('viewInvoiceModal').classList.remove('show');
+}
+
+function markAsPaid() {
+  const index = invoices.findIndex(i => i.id === currentInvoiceId);
+  if (index === -1) return;
+  invoices[index].status = 'paid';
+  renderInvoices();
+  updateStats();
+  closeViewInvoiceModal();
+  showToast('success', 'Payment Recorded', 'Invoice marked as paid!');
+}
+
+function sendInvoice() {
+  showToast('success', 'Invoice Sent', 'Invoice emailed to client!');
+}
+
+function downloadInvoicePDF() {
+  showToast('success', 'PDF Download', 'Invoice PDF downloading...');
+}
+
+function renderRecurring() {
+  const tbody = document.getElementById('recurringTableBody');
+  tbody.innerHTML = recurringSchedules.map(sched => {
+    const client = clients.find(c => c.id === sched.clientId);
+    const template = templates.find(t => t.id === sched.templateId);
+    return `
+      <tr>
+        <td>${client ? client.name : 'Unknown'}</td>
+        <td>${template ? template.name : 'Unknown'}</td>
+        <td><span class="recurring-badge">↻ ${sched.frequency.charAt(0).toUpperCase() + sched.frequency.slice(1)}</span></td>
+        <td>${formatDate(sched.nextDate)}</td>
+        <td class="amount">$${template ? calculateTemplateTotal(template).toFixed(2) : '0.00'}</td>
+        <td>${sched.generated}</td>
+        <td><span class="status-badge status-${sched.status}">${sched.status.charAt(0).toUpperCase() + sched.status.slice(1)}</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="action-btn" onclick="toggleRecurring(${sched.id})">${sched.status === 'active' ? '⏸' : '▶'}</button>
+            <button class="action-btn" onclick="deleteRecurring(${sched.id})">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function toggleRecurring(id) {
+  const index = recurringSchedules.findIndex(r => r.id === id);
+  if (index === -1) return;
+  recurringSchedules[index].status = recurringSchedules[index].status === 'active' ? 'paused' : 'active';
+  renderRecurring();
+}
+
+function deleteRecurring(id) {
+  if (!confirm('Delete this schedule?')) return;
+  recurringSchedules = recurringSchedules.filter(r => r.id !== id);
+  renderRecurring();
+  updateStats();
+}
+
+function initCharts() {
+  // Revenue chart
+  const ctx1 = document.getElementById('revenueChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Revenue',
+        data: [3200, 4500, 3800, 5200, 4800, 2900, 4100],
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#95a9b8' } },
+        x: { grid: { display: false }, ticks: { color: '#95a9b8' } }
+      }
+    }
+  });
+  
+  // Status chart
+  const ctx2 = document.getElementById('statusChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Paid', 'Pending', 'Overdue', 'Draft'],
+      datasets: [{
+        data: [
+          invoices.filter(i => i.status === 'paid').length,
+          invoices.filter(i => i.status === 'pending').length,
+          invoices.filter(i => i.status === 'overdue').length,
+          invoices.filter(i => i.status === 'draft').length
+        ],
+        backgroundColor: ['#22c55e', '#fbbf24', '#ef4444', '#60a5fa']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'right', labels: { color: '#e7f3f7' } } }
+    }
+  });
+  
+  // Clients chart
+  const ctx3 = document.getElementById('clientsChart').getContext('2d');
+  new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: clients.slice(0, 5).map(c => c.name.split(' ')[0]),
+      datasets: [{
+        label: 'Revenue',
+        data: clients.slice(0, 5).map(c => c.price * 3),
+        backgroundColor: '#22c55e'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#95a9b8' } },
+        x: { grid: { display: false }, ticks: { color: '#95a9b8' } }
+      }
+    }
+  });
+}
+
+function populateSelects() {
+  const clientSelects = document.querySelectorAll('select[name="clientId"]');
+  clientSelects.forEach(select => {
+    select.innerHTML = '<option value="">Choose a client...</option>' +
+      clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  });
+}
+
+function renderAttentionList() {
+  const overdue = invoices.filter(i => i.status === 'overdue');
+  document.getElementById('attentionList').innerHTML = overdue.length ? overdue.slice(0, 3).map(inv => {
+    const client = clients.find(c => c.id === inv.clientId);
+    return `<div style="padding:10px; background:var(--glass); border-radius:8px;">
+      <div style="font-size:12px; font-weight:600;">${client ? client.name : 'Unknown'}</div>
+      <div style="font-size:11px; color:var(--danger);">$${inv.amount.toFixed(2)} • Due ${formatDate(inv.dueDate)}</div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted); font-size:12px;">No issues! 🎉</div>';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function showToast(type, title, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <div class="icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ'}</div>
+    <div class="content">
+      <div class="title">${title}</div>
+      <div class="message">${message}</div>
+    </div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+function refreshData() {
+  showToast('success', 'Data Refreshed', 'Latest data loaded');
+}
+
+function exportData() {
+  showToast('success', 'Export Complete', 'Data exported to CSV');
+}
+
+function exportAllInvoices() {
+  showToast('success', 'Export Started', 'All invoices being exported...');
+}
+
+// Detail view functions
+function showRevenueBreakdown() { showToast('info', 'Revenue', 'Opening detailed breakdown...'); }
+function showInvoiceBreakdown() { switchTab('invoices', document.querySelectorAll('.tab')[1]); }
+function showPendingBreakdown() { 
+  document.getElementById('invoiceStatusFilter').value = 'pending';
+  filterInvoices();
+  switchTab('invoices', document.querySelectorAll('.tab')[1]);
+}
+function showOverdueBreakdown() { 
+  document.getElementById('invoiceStatusFilter').value = 'overdue';
+  filterInvoices();
+  switchTab('invoices', document.querySelectorAll('.tab')[1]);
+}
+function showRecurringBreakdown() { switchTab('recurring', document.querySelectorAll('.tab')[2]); }
+
+// Initialize
+init();
+</script>
+
+</body>
+</html>
