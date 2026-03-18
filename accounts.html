@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Everest Security — Client Accounts</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#062026;
+  --panel:#0d1519;
+  --muted:#95a9b8;
+  --accent:#22c55e;
+  --accent-2:#9ef07e;
+  --accent-glow:rgba(34,197,94,0.3);
+  --glass: rgba(255,255,255,0.03);
+  --danger:#ef4444;
+  --warning:#fbbf24;
+  --info:#60a5fa;
+  --purple:#a855f7;
+  --orange:#f97316;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background: linear-gradient(180deg, #02110d 0%, #062026 100%);
+  color:#e7f3f7;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+
+.bg-animation{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+.bg-animation::before{
+  content:'';
+  position:absolute;
+  width:600px;
+  height:600px;
+  background:radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%);
+  top:-200px;
+  right:-200px;
+  animation:pulse 10s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1); opacity:0.4; }
+  50%{ transform:scale(1.3); opacity:0.7; }
+}
+
+.page-frame{
+  max-width:1400px;
+  margin:16px auto;
+  padding:12px;
+  border-radius:16px;
+  background: linear-gradient(135deg, rgba(0,255,106,0.12), rgba(0,255,106,0.04));
+  box-shadow: 0 28px 80px rgba(2,10,8,0.5);
+  position:relative;
+  z-index:1;
+}
+
+.app {
+  display:flex;
+  gap:12px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(8,12,14,0.98), rgba(5,8,10,0.95));
+  padding:12px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg, rgba(2,6,10,0.95), rgba(1,4,8,0.92));
+  padding:16px;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  border-right:1px solid rgba(255,255,255,0.03);
+  position:sticky;
+  top:16px;
+  height:calc(100vh - 56px);
+  overflow-y:auto;
+}
+.brand{ 
+  color:var(--accent); 
+  font-weight:800; 
+  font-size:18px; 
+  display:flex; 
+  gap:10px; 
+  align-items:center;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.brand .logo-dot{ 
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); 
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center; 
+  color:#042017; 
+  font-weight:800; 
+  font-size:16px;
+  box-shadow:0 4px 20px var(--accent-glow);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{ box-shadow:0 4px 20px var(--accent-glow); }
+  50%{ box-shadow:0 4px 30px var(--accent-glow), 0 0 40px var(--accent-glow); }
+}
+
+.searchbox{ 
+  background:var(--glass); 
+  border-radius:10px; 
+  padding:12px 14px; 
+  color:var(--muted); 
+  font-size:13px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.2s;
+}
+.searchbox:hover, .searchbox:focus-within{
+  border-color:rgba(34,197,94,0.3);
+  background:rgba(255,255,255,0.05);
+}
+.menu { margin-top:4px; display:flex; flex-direction:column; gap:4px; }
+.menu .section{ 
+  color:var(--muted); 
+  font-size:10px; 
+  margin-top:12px; 
+  margin-bottom:4px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:600;
+}
+.menu a{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  color:#b8d4c8; 
+  text-decoration:none; 
+  padding:10px 12px; 
+  border-radius:10px; 
+  font-size:13.5px;
+  font-weight:500;
+  transition:all 0.2s ease;
+  position:relative;
+  overflow:hidden;
+}
+.menu a::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:var(--accent);
+  transform:scaleY(0);
+  transition:transform 0.2s;
+  border-radius:0 3px 3px 0;
+}
+.menu a:hover{ 
+  background:rgba(255,255,255,0.04);
+  color:#fff;
+  transform:translateX(4px);
+}
+.menu a.active{ 
+  background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05));
+  color:#fff;
+}
+.menu a.active::before{ transform:scaleY(1); }
+.menu a .icon{ font-size:16px; }
+
+.live-indicator{
+  margin-top:auto;
+  padding:14px;
+  background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.02));
+  border-radius:10px;
+  border:1px solid rgba(34,197,94,0.15);
+}
+.live-indicator .status{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  font-weight:500;
+}
+.live-indicator .pulse{
+  width:10px;
+  height:10px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.3); opacity:0.7; }
+}
+.live-indicator .company{ 
+  margin-top:8px; 
+  font-size:12px; 
+  color:var(--muted);
+}
+
+/* CENTER */
+.center { 
+  flex:1; 
+  border-radius:12px; 
+  padding:12px; 
+  display:flex; 
+  flex-direction:column; 
+  gap:12px;
+  overflow:hidden;
+}
+
+.header { 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  gap:12px;
+  padding:8px 4px;
+}
+.breadcrumbs{ color:var(--muted); font-size:12px; display:flex; gap:8px; align-items:center; }
+.breadcrumbs a{ color:var(--muted); text-decoration:none; transition:color 0.2s; }
+.breadcrumbs a:hover{ color:var(--accent); }
+.header h1{ margin:0; font-size:22px; font-weight:700; }
+
+.header-actions{ display:flex; gap:10px; align-items:center; }
+
+/* Buttons */
+.btn-primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  color:#041018;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn-primary:hover{ 
+  transform:translateY(-2px); 
+  box-shadow:0 8px 25px rgba(34,197,94,0.4);
+}
+
+.btn-secondary{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:600;
+  color:#cfe8d6;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn-secondary:hover{ background:rgba(255,255,255,0.1); }
+
+.btn-danger{
+  background:linear-gradient(90deg,var(--danger),#f87171);
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.btn-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.btn-icon:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+
+/* Stats */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
+}
+.stat-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  padding:18px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.3s ease;
+  cursor:pointer;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(34,197,94,0.2);
+}
+.stat-card .label{ color:var(--muted); font-size:12px; font-weight:500; }
+.stat-card .value{ 
+  font-weight:800; 
+  font-size:26px; 
+  margin-top:6px;
+}
+.stat-card.positive .value{ color:var(--accent); }
+.stat-card.warning .value{ color:var(--warning); }
+.stat-card.danger .value{ color:var(--danger); }
+.stat-card.info .value{ color:var(--info); }
+
+/* Filter bar */
+.filter-bar{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+  background:var(--glass);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+.search-input{
+  flex:1;
+  background:transparent;
+  border:none;
+  color:#e7f3f7;
+  font-size:14px;
+  padding:8px;
+}
+.search-input:focus{ outline:none; }
+.search-input::placeholder{ color:var(--muted); }
+.filter-select{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  padding:10px 14px;
+  color:#cfe8d3;
+  font-size:13px;
+  cursor:pointer;
+}
+.filter-select:focus{ outline:none; border-color:var(--accent); }
+
+/* Bulk actions */
+.bulk-actions{
+  display:none;
+  gap:10px;
+  padding:12px 16px;
+  background:rgba(34,197,94,0.08);
+  border-radius:10px;
+  border:1px solid rgba(34,197,94,0.2);
+  margin-bottom:12px;
+  animation:slideDown 0.3s ease;
+}
+.bulk-actions.show{ display:flex; }
+@keyframes slideDown{
+  from{ opacity:0; transform:translateY(-10px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.bulk-actions .count{ font-weight:600; color:var(--accent); }
+
+/* Table */
+.table-panel{
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  overflow:hidden;
+}
+.table-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.table-title{ font-size:15px; font-weight:700; }
+.table-info{ color:var(--muted); font-size:12px; }
+.table-wrap{ overflow:auto; max-height:500px; }
+table{ width:100%; border-collapse:collapse; color:#e3f7ee; font-size:13px; }
+thead th{ 
+  text-align:left; 
+  padding:14px 16px; 
+  color:var(--muted); 
+  font-size:11px; 
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  position:sticky; 
+  top:0; 
+  background:rgba(10,14,16,0.98);
+  z-index:1;
+  font-weight:600;
+}
+tbody td{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.03); }
+tbody tr{ transition:all 0.2s; }
+tbody tr:hover{ background:linear-gradient(90deg, rgba(34,197,94,0.05), transparent); }
+tbody tr.selected{ background:rgba(34,197,94,0.1); }
+
+/* Checkbox */
+.checkbox-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.checkbox-wrap input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  accent-color:var(--accent);
+  cursor:pointer;
+}
+
+/* Company cell */
+.company-cell{ display:flex; align-items:center; gap:14px; }
+.company-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #3a7bd5, #00d2ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:14px;
+  color:#fff;
+  flex-shrink:0;
+}
+.company-info{ display:flex; flex-direction:column; }
+.company-name{ font-weight:600; font-size:14px; }
+.company-user{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+/* Status badges */
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+}
+.status-active{ background:rgba(34,197,94,0.15); color:var(--accent); }
+.status-suspended{ background:rgba(239,68,68,0.15); color:var(--danger); }
+.status-pending{ background:rgba(251,191,36,0.15); color:var(--warning); }
+.status-dot{ width:6px; height:6px; border-radius:50%; }
+
+/* Action dropdown */
+.action-dropdown{ position:relative; }
+.action-btn{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+  transition:all 0.2s;
+}
+.action-btn:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+.dropdown-menu{
+  position:absolute;
+  right:0;
+  top:100%;
+  margin-top:6px;
+  background:linear-gradient(180deg, rgba(14,18,20,0.98), rgba(8,12,14,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  min-width:200px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  z-index:100;
+  display:none;
+  overflow:hidden;
+  animation:dropdownIn 0.2s ease;
+}
+@keyframes dropdownIn{
+  from{ opacity:0; transform:translateY(-10px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.dropdown-menu.show{ display:block; }
+.dropdown-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  color:#cfe8d6;
+  font-size:13px;
+  cursor:pointer;
+  transition:all 0.15s;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.dropdown-item:last-child{ border-bottom:none; }
+.dropdown-item:hover{ background:rgba(34,197,94,0.08); }
+.dropdown-item.danger{ color:var(--danger); }
+.dropdown-item.danger:hover{ background:rgba(239,68,68,0.08); }
+.dropdown-divider{
+  height:1px;
+  background:rgba(255,255,255,0.06);
+  margin:6px 0;
+}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.modal-overlay.show{ display:flex; }
+.modal{
+  background:linear-gradient(180deg, rgba(12,16,18,0.98), rgba(8,12,14,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  width:100%;
+  max-width:600px;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  animation:modalIn 0.3s ease;
+}
+.modal.wide{ max-width:800px; }
+@keyframes modalIn{
+  from{ transform:scale(0.9); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.modal-header h2{ margin:0; font-size:18px; }
+.modal-close{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  font-size:24px;
+  cursor:pointer;
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.modal-close:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+.modal-body{ padding:24px; }
+.modal-footer{
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+  padding:18px 24px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+
+/* Form */
+.form-group{ margin-bottom:18px; }
+.form-group label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:8px;
+  font-weight:500;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;
+  padding:12px 16px;
+  color:#e7f3f7;
+  font-size:14px;
+  font-family:inherit;
+  transition:all 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(34,197,94,0.1);
+}
+.form-group textarea{ min-height:100px; resize:vertical; }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.form-row.three{ grid-template-columns:1fr 1fr 1fr; }
+
+/* Toggle */
+.toggle-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  background:var(--glass);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+}
+.toggle-label{ font-size:14px; }
+.toggle{
+  position:relative;
+  width:50px;
+  height:26px;
+  background:rgba(255,255,255,0.1);
+  border-radius:13px;
+  cursor:pointer;
+  transition:background 0.3s;
+}
+.toggle.active{ background:var(--accent); }
+.toggle::after{
+  content:'';
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:20px;
+  height:20px;
+  background:#fff;
+  border-radius:50%;
+  transition:transform 0.3s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.toggle.active::after{ transform:translateX(24px); }
+
+/* Details view */
+.details-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.detail-item{
+  padding:16px;
+  background:var(--glass);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+.detail-label{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:6px;
+}
+.detail-value{ font-size:15px; font-weight:600; }
+.detail-value.password{ font-family:monospace; letter-spacing:2px; }
+
+/* Toast */
+.toast-container{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:2000;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.toast{
+  background:linear-gradient(135deg, rgba(10,14,16,0.98), rgba(6,10,12,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transform:translateX(400px);
+  opacity:0;
+  transition:all 0.3s ease;
+  min-width:280px;
+}
+.toast.show{ transform:translateX(0); opacity:1; }
+.toast.success{ border-color:rgba(34,197,94,0.3); }
+.toast.error{ border-color:rgba(239,68,68,0.3); }
+.toast .icon{ font-size:20px; }
+.toast .content{ flex:1; }
+.toast .title{ font-weight:600; font-size:13px; }
+.toast .message{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Payment terms badge */
+.term-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:500;
+}
+.term-monthly{ background:rgba(96,165,250,0.15); color:var(--info); }
+.term-quarterly{ background:rgba(168,85,247,0.15); color:var(--purple); }
+.term-6months{ background:rgba(249,115,22,0.15); color:var(--orange); }
+.term-annual{ background:rgba(34,197,94,0.15); color:var(--accent); }
+
+/* Responsive */
+@media (max-width:1200px){
+  .stats-row{ grid-template-columns:repeat(2, 1fr); }
+  .form-row, .form-row.three{ grid-template-columns:1fr; }
+}
+@media (max-width:768px){
+  .sidebar{ display:none; }
+  .stats-row{ grid-template-columns:1fr; }
+  .filter-bar{ flex-wrap:wrap; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-animation"></div>
+
+<div class="page-frame">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-dot">E</div>
+        Everest Admin
+      </div>
+      
+      <div class="searchbox">🔍 Search anything...</div>
+
+      <nav class="menu">
+        <div class="section">Dashboards</div>
+        <a href="admin.html"><span class="icon">📊</span> Overview</a>
+        <a class="active" href="accounts.html"><span class="icon">👥</span> Accounts</a>
+        <a href="analytics.html"><span class="icon">📈</span> Analytics</a>
+        <a href="invoices.html"><span class="icon">🧾</span> Invoices</a>
+        
+        <div class="section">Management</div>
+        <a href="#"><span class="icon">💬</span> Messages</a>
+        <a href="#"><span class="icon">⭐</span> Reviews</a>
+        <a href="#"><span class="icon">❓</span> Help Centre</a>
+      </nav>
+
+      <div class="live-indicator">
+        <div class="status">
+          <div class="pulse"></div>
+          <span>System Online</span>
+        </div>
+        <div class="company">Everest Security Pvt. Ltd.</div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <section class="center">
+
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin.html">Dashboard</a> / <span style="color:#fff;">Accounts</span>
+          </div>
+          <h1>Client Accounts</h1>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-secondary" onclick="exportAccounts()">📥 Export</button>
+          <button class="btn-primary" onclick="openAddModal()">+ Add Account</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card positive">
+          <div class="label">Total Accounts</div>
+          <div class="value" id="totalAccounts">0</div>
+        </div>
+        <div class="stat-card info">
+          <div class="label">Active</div>
+          <div class="value" id="activeAccounts">0</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="label">Monthly Revenue</div>
+          <div class="value" id="monthlyRevenue">$0</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="label">Suspended</div>
+          <div class="value" id="suspendedAccounts">0</div>
+        </div>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="bulk-actions" id="bulkActions">
+        <span class="count"><span id="selectedCount">0</span> selected</span>
+        <button class="btn-secondary" onclick="bulkSendReminder()">📧 Send Reminder</button>
+        <button class="btn-secondary" onclick="bulkGenerateInvoice()">🧾 Generate Invoice</button>
+        <button class="btn-secondary" onclick="bulkSuspend()">⏸ Suspend</button>
+        <button class="btn-danger" onclick="bulkDelete()">🗑 Delete</button>
+        <button class="btn-icon" onclick="clearSelection()" style="margin-left:auto;">✕</button>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by company, email, or username..." onkeyup="filterAccounts()">
+        <select class="filter-select" id="statusFilter" onchange="filterAccounts()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="suspended">Suspended</option>
+          <option value="pending">Pending</option>
+        </select>
+        <select class="filter-select" id="termFilter" onchange="filterAccounts()">
+          <option value="">All Terms</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="6months">6 Months</option>
+          <option value="annual">Annual</option>
+        </select>
+        <select class="filter-select" id="sortFilter" onchange="sortAccounts()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="name">Name A-Z</option>
+          <option value="price">Price High-Low</option>
+        </select>
+      </div>
+
+      <!-- Accounts Table -->
+      <div class="table-panel">
+        <div class="table-header">
+          <div class="table-title">All Accounts</div>
+          <div class="table-info">Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> accounts</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px;">
+                  <div class="checkbox-wrap">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                  </div>
+                </th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Price</th>
+                <th>Term</th>
+                <th>Status</th>
+                <th>Auto Renew</th>
+                <th style="width:60px">Action</th>
+              </tr>
+            </thead>
+            <tbody id="accountsTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT ACCOUNT MODAL -->
+<div id="accountModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="accountModalTitle">Add New Account</h2>
+      <button class="modal-close" onclick="closeAccountModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="accountForm">
+        <input type="hidden" name="accountId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name *</label>
+            <input type="text" name="companyName" required placeholder="Enter company name">
+          </div>
+          <div class="form-group">
+            <label>Username *</label>
+            <input type="text" name="username" required placeholder="Enter username">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" name="email" required placeholder="email@company.com">
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="text" name="password" required placeholder="Set password">
+          </div>
+        </div>
+        <div class="form-row three">
+          <div class="form-group">
+            <label>Price/Month ($) *</label>
+            <input type="number" name="price" required placeholder="99.99" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Payment Term</label>
+            <select name="paymentTerm">
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="6months">6 Months</option>
+              <option value="annual">Annual</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea name="address" placeholder="Full company address"></textarea>
+        </div>
+        <div class="toggle-wrap">
+          <span class="toggle-label">Auto Renewal</span>
+          <div class="toggle active" id="autoRenewToggle" onclick="toggleSwitch(this)"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAccountModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveAccount()">Save Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW ACCOUNT MODAL -->
+<div id="viewModal" class="modal-overlay">
+  <div class="modal wide">
+    <div class="modal-header">
+      <h2>Account Details</h2>
+      <button class="modal-close" onclick="closeViewModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="viewContent">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeViewModal()">Close</button>
+      <button class="btn-secondary" onclick="fromViewToEdit()">✎ Edit</button>
+      <button class="btn-primary" onclick="generateInvoiceForAccount()">🧾 Generate Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div id="resetModal" class="modal-overlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Reset Password</h2>
+      <button class="modal-close" onclick="closeResetModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">A new password will be generated and sent to the user's email.</p>
+      <div class="form-group">
+        <label>Account</label>
+        <input type="text" id="resetAccountName" readonly style="opacity:0.6;">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" id="resetAccountEmail" readonly style="opacity:0.6;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeResetModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmResetPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Delete Account</h2>
+      <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Are you sure? This action cannot be undone.</p>
+      <div class="form-group">
+        <label>Account to Delete</label>
+        <input type="text" id="deleteAccountName" readonly style="opacity:0.6;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PRICE MODAL -->
+<div id="priceModal" class="modal-overlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Edit Price</h2>
+      <button class="modal-close" onclick="closePriceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Current Price</label>
+        <input type="text" id="currentPriceDisplay" readonly style="opacity:0.6;">
+      </div>
+      <div class="form-group">
+        <label>New Price ($) *</label>
+        <input type="number" id="newPrice" required step="0.01" placeholder="Enter new price">
+      </div>
+      <div class="form-group">
+        <label>Reason (optional)</label>
+        <input type="text" id="priceChangeReason" placeholder="e.g., Plan upgrade">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closePriceModal()">Cancel</button>
+      <button class="btn-primary" onclick="savePriceChange()">Update Price</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ==================== DATA ====================
+
+let accounts = [
+  { id: 1, companyName: "TechCorp Solutions", username: "techadmin", email: "admin@techcorp.com", password: "TechPass123!", price: 299.99, paymentTerm: "monthly", status: "active", autoRenew: true, address: "123 Tech Street, Silicon Valley, CA", createdDate: "2024-01-15", lastInvoice: "2024-12-01" },
+  { id: 2, companyName: "Global Finance Ltd", username: "globalfin", email: "contact@globalfin.com", password: "FinSecure456!", price: 499.99, paymentTerm: "quarterly", status: "active", autoRenew: true, address: "456 Finance Ave, New York, NY", createdDate: "2024-02-20", lastInvoice: "2024-10-01" },
+  { id: 3, companyName: "RetailMax Stores", username: "retailmax", email: "support@retailmax.com", password: "Retail789!", price: 149.99, paymentTerm: "monthly", status: "suspended", autoRenew: false, address: "789 Retail Blvd, Chicago, IL", createdDate: "2024-03-10", lastInvoice: "2024-09-01" },
+  { id: 4, companyName: "HealthFirst Medical", username: "healthfirst", email: "info@healthfirst.com", password: "Health321!", price: 399.99, paymentTerm: "6months", status: "active", autoRenew: true, address: "321 Health Way, Boston, MA", createdDate: "2024-04-05", lastInvoice: "2024-11-01" },
+  { id: 5, companyName: "EduLearn Academy", username: "edulearn", email: "admin@edulearn.com", password: "EduPass654!", price: 199.99, paymentTerm: "annual", status: "pending", autoRenew: false, address: "654 Education Rd, Austin, TX", createdDate: "2024-05-12", lastInvoice: null },
+  { id: 6, companyName: "Manufacturing Pro", username: "manupro", email: "ops@manupro.com", password: "Manu987!", price: 599.99, paymentTerm: "quarterly", status: "active", autoRenew: true, address: "987 Industry St, Detroit, MI", createdDate: "2024-06-18", lastInvoice: "2024-10-01" },
+  { id: 7, companyName: "CloudNine Services", username: "cloudnine", email: "hello@cloudnine.io", password: "Cloud159!", price: 249.99, paymentTerm: "monthly", status: "active", autoRenew: true, address: "159 Cloud Lane, Seattle, WA", createdDate: "2024-07-22", lastInvoice: "2024-12-01" },
+  { id: 8, companyName: "SecureBank Inc", username: "securebank", email: "security@securebank.com", password: "BankSecure753!", price: 799.99, paymentTerm: "annual", status: "active", autoRenew: true, address: "753 Bank Plaza, San Francisco, CA", createdDate: "2024-08-30", lastInvoice: "2024-09-01" },
+  { id: 9, companyName: "Digital Marketing Co", username: "digimark", email: "team@digimark.com", password: "DigiMark2024!", price: 349.99, paymentTerm: "6months", status: "active", autoRenew: true, address: "222 Market St, Los Angeles, CA", createdDate: "2024-09-15", lastInvoice: "2024-11-01" },
+  { id: 10, companyName: "Logistics Express", username: "logiex", email: "dispatch@logiex.com", password: "LogiEx789!", price: 449.99, paymentTerm: "quarterly", status: "active", autoRenew: true, address: "333 Transport Ave, Dallas, TX", createdDate: "2024-10-01", lastInvoice: "2024-10-01" }
+];
+
+let selectedAccounts = new Set();
+let currentAccountId = null;
+let editingAccount = false;
+
+// ==================== INITIALIZATION ====================
+
+function init() {
+  renderAccounts();
+  updateStats();
+  
+  // Simulate real-time updates
+  setInterval(() => {
+    // Randomly update stats slightly
+    const stat = Math.random();
+    if (stat > 0.7) {
+      updateStats();
+    }
+  }, 5000);
+}
+
+// ==================== STATS ====================
+
+function updateStats() {
+  const total = accounts.length;
+  const active = accounts.filter(a => a.status === 'active').length;
+  const suspended = accounts.filter(a => a.status === 'suspended').length;
+  const revenue = accounts.filter(a => a.status === 'active').reduce((sum, a) => sum + a.price, 0);
+  
+  animateNumber('totalAccounts', total, '');
+  animateNumber('activeAccounts', active, '');
+  animateNumber('suspendedAccounts', suspended, '');
+  animateNumber('monthlyRevenue', revenue, '$');
+}
+
+function animateNumber(id, value, prefix) {
+  const el = document.getElementById(id);
+  el.textContent = prefix + value.toLocaleString('en-US', { minimumFractionDigits: prefix === '$' ? 0 : 0, maximumFractionDigits: 0 });
+}
+
+// ==================== RENDER ACCOUNTS ====================
+
+function renderAccounts(filteredAccounts = null) {
+  const tbody = document.getElementById('accountsTableBody');
+  const data = filteredAccounts || accounts;
+  
+  tbody.innerHTML = data.map(account => `
+    <tr class="${selectedAccounts.has(account.id) ? 'selected' : ''}" data-id="${account.id}">
+      <td>
+        <div class="checkbox-wrap">
+          <input type="checkbox" ${selectedAccounts.has(account.id) ? 'checked' : ''} onchange="toggleAccountSelection(${account.id})">
+        </div>
+      </td>
+      <td>
+        <div class="company-cell">
+          <div class="company-avatar">${getInitials(account.companyName)}</div>
+          <div class="company-info">
+            <span class="company-name">${account.companyName}</span>
+            <span class="company-user">@${account.username}</span>
+          </div>
+        </div>
+      </td>
+      <td>${account.email}</td>
+      <td style="font-weight:600;">$${account.price.toFixed(2)}</td>
+      <td>
+        <span class="term-badge term-${account.paymentTerm}">
+          ${getTermLabel(account.paymentTerm)}
+        </span>
+      </td>
+      <td>
+        <span class="status-badge status-${account.status}">
+          <span class="status-dot"></span>
+          ${account.status.charAt(0).toUpperCase() + account.status.slice(1)}
+        </span>
+      </td>
+      <td>
+        <span style="color:${account.autoRenew ? 'var(--accent)' : 'var(--muted)'}; font-size:13px;">
+          ${account.autoRenew ? '✓ On' : '✗ Off'}
+        </span>
+      </td>
+      <td>
+        <div class="action-dropdown">
+          <button class="action-btn" onclick="toggleDropdown(event, ${account.id})">⋮</button>
+          <div class="dropdown-menu" id="dropdown-${account.id}">
+            <div class="dropdown-item" onclick="viewAccount(${account.id})">👁 View Details</div>
+            <div class="dropdown-item" onclick="editAccount(${account.id})">✎ Edit Account</div>
+            <div class="dropdown-item" onclick="editPrice(${account.id})">$ Edit Price</div>
+            <div class="dropdown-item" onclick="resetPassword(${account.id})">🔑 Reset Password</div>
+            <div class="dropdown-item" onclick="sendReminder(${account.id})">📧 Send Reminder</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" onclick="toggleSuspend(${account.id})">${account.status === 'suspended' ? '▶ Activate' : '⏸ Suspend'}</div>
+            <div class="dropdown-item danger" onclick="deleteAccount(${account.id})">🗑 Delete Account</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  
+  document.getElementById('showingCount').textContent = data.length;
+  document.getElementById('totalCount').textContent = accounts.length;
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function getTermLabel(term) {
+  const labels = {
+    monthly: 'Monthly',
+    quarterly: 'Quarterly',
+    '6months': '6 Months',
+    annual: 'Annual'
+  };
+  return labels[term] || term;
+}
+
+// ==================== FILTERING & SORTING ====================
+
+function filterAccounts() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const term = document.getElementById('termFilter').value;
+  
+  const filtered = accounts.filter(account => {
+    const matchesSearch = account.companyName.toLowerCase().includes(search) ||
+                         account.username.toLowerCase().includes(search) ||
+                         account.email.toLowerCase().includes(search);
+    const matchesStatus = !status || account.status === status;
+    const matchesTerm = !term || account.paymentTerm === term;
+    return matchesSearch && matchesStatus && matchesTerm;
+  });
+  
+  renderAccounts(filtered);
+}
+
+function sortAccounts() {
+  const sort = document.getElementById('sortFilter').value;
+  
+  const sorted = [...accounts].sort((a, b) => {
+    switch(sort) {
+      case 'newest': return new Date(b.createdDate) - new Date(a.createdDate);
+      case 'oldest': return new Date(a.createdDate) - new Date(b.createdDate);
+      case 'name': return a.companyName.localeCompare(b.companyName);
+      case 'price': return b.price - a.price;
+      default: return 0;
+    }
+  });
+  
+  renderAccounts(sorted);
+}
+
+// ==================== BULK SELECTION ====================
+
+function toggleAccountSelection(id) {
+  if (selectedAccounts.has(id)) {
+    selectedAccounts.delete(id);
+  } else {
+    selectedAccounts.add(id);
+  }
+  updateBulkActions();
+  renderAccounts();
+}
+
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAll').checked;
+  const visibleAccounts = document.querySelectorAll('#accountsTableBody tr');
+  
+  visibleAccounts.forEach(row => {
+    const id = parseInt(row.dataset.id);
+    if (checked) {
+      selectedAccounts.add(id);
+    } else {
+      selectedAccounts.delete(id);
+    }
+  });
+  
+  updateBulkActions();
+  renderAccounts();
+}
+
+function updateBulkActions() {
+  const bulkActions = document.getElementById('bulkActions');
+  const count = selectedAccounts.size;
+  
+  document.getElementById('selectedCount').textContent = count;
+  
+  if (count > 0) {
+    bulkActions.classList.add('show');
+  } else {
+    bulkActions.classList.remove('show');
+    document.getElementById('selectAll').checked = false;
+  }
+}
+
+function clearSelection() {
+  selectedAccounts.clear();
+  document.getElementById('selectAll').checked = false;
+  updateBulkActions();
+  renderAccounts();
+}
+
+// ==================== BULK ACTIONS ====================
+
+function bulkSendReminder() {
+  showToast('success', 'Reminders Sent', `Sent to ${selectedAccounts.size} accounts`);
+  clearSelection();
+}
+
+function bulkGenerateInvoice() {
+  showToast('success', 'Invoices Generated', `Created ${selectedAccounts.size} invoices`);
+  clearSelection();
+}
+
+function bulkSuspend() {
+  accounts = accounts.map(a => selectedAccounts.has(a.id) ? {...a, status: 'suspended'} : a);
+  renderAccounts();
+  updateStats();
+  showToast('success', 'Accounts Suspended', `${selectedAccounts.size} accounts suspended`);
+  clearSelection();
+}
+
+function bulkDelete() {
+  if (!confirm(`Delete ${selectedAccounts.size} accounts? This cannot be undone.`)) return;
+  accounts = accounts.filter(a => !selectedAccounts.has(a.id));
+  renderAccounts();
+  updateStats();
+  showToast('success', 'Accounts Deleted', `${selectedAccounts.size} accounts deleted`);
+  clearSelection();
+}
+
+// ==================== DROPDOWN ====================
+
+function toggleDropdown(event, id) {
+  event.stopPropagation();
+  
+  // Close all other dropdowns
+  document.querySelectorAll('.dropdown-menu.show').forEach(d => {
+    if (d.id !== `dropdown-${id}`) d.classList.remove('show');
+  });
+  
+  const dropdown = document.getElementById(`dropdown-${id}`);
+  dropdown.classList.toggle('show');
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-menu.show').forEach(d => d.classList.remove('show'));
+});
+
+// ==================== MODALS ====================
+
+function openAddModal() {
+  editingAccount = false;
+  currentAccountId = null;
+  document.getElementById('accountModalTitle').textContent = 'Add New Account';
+  document.getElementById('accountForm').reset();
+  document.getElementById('autoRenewToggle').classList.add('active');
+  document.getElementById('accountModal').classList.add('show');
+}
+
+function closeAccountModal() {
+  document.getElementById('accountModal').classList.remove('show');
+}
+
+function closeViewModal() {
+  document.getElementById('viewModal').classList.remove('show');
+}
+
+function closeResetModal() {
+  document.getElementById('resetModal').classList.remove('show');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+}
+
+function closePriceModal() {
+  document.getElementById('priceModal').classList.remove('show');
+}
+
+function toggleSwitch(el) {
+  el.classList.toggle('active');
+}
+
+// ==================== CRUD OPERATIONS ====================
+
+function saveAccount() {
+  const form = document.getElementById('accountForm');
+  const formData = new FormData(form);
+  
+  const accountData = {
+    id: editingAccount ? currentAccountId : Date.now(),
+    companyName: formData.get('companyName'),
+    username: formData.get('username'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+    price: parseFloat(formData.get('price')),
+    paymentTerm: formData.get('paymentTerm'),
+    status: formData.get('status'),
+    autoRenew: document.getElementById('autoRenewToggle').classList.contains('active'),
+    address: formData.get('address') || '',
+    createdDate: editingAccount ? accounts.find(a => a.id === currentAccountId)?.createdDate : new Date().toISOString().split('T')[0],
+    lastInvoice: editingAccount ? accounts.find(a => a.id === currentAccountId)?.lastInvoice : null
+  };
+  
+  if (editingAccount) {
+    const index = accounts.findIndex(a => a.id === currentAccountId);
+    accounts[index] = accountData;
+    showToast('success', 'Account Updated', `${accountData.companyName} has been updated`);
+  } else {
+    accounts.push(accountData);
+    showToast('success', 'Account Created', `${accountData.companyName} has been added`);
+  }
+  
+  renderAccounts();
+  updateStats();
+  closeAccountModal();
+}
+
+function viewAccount(id) {
+  currentAccountId = id;
+  const account = accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  document.getElementById('viewContent').innerHTML = `
+    <div class="details-grid">
+      <div class="detail-item">
+        <div class="detail-label">Company Name</div>
+        <div class="detail-value">${account.companyName}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Username</div>
+        <div class="detail-value">${account.username}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Email</div>
+        <div class="detail-value">${account.email}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Password</div>
+        <div class="detail-value password">••••••••</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Price/Month</div>
+        <div class="detail-value">$${account.price.toFixed(2)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Payment Term</div>
+        <div class="detail-value">
+          <span class="term-badge term-${account.paymentTerm}">${getTermLabel(account.paymentTerm)}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Status</div>
+        <div class="detail-value">
+          <span class="status-badge status-${account.status}">${account.status.charAt(0).toUpperCase() + account.status.slice(1)}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Auto Renewal</div>
+        <div class="detail-value">${account.autoRenew ? 'Enabled ✓' : 'Disabled ✗'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Created Date</div>
+        <div class="detail-value">${formatDate(account.createdDate)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Last Invoice</div>
+        <div class="detail-value">${account.lastInvoice ? formatDate(account.lastInvoice) : 'Never'}</div>
+      </div>
+    </div>
+    <div class="detail-item" style="margin-top:16px;">
+      <div class="detail-label">Address</div>
+      <div class="detail-value">${account.address || 'No address provided'}</div>
+    </div>
+  `;
+  
+  document.getElementById('viewModal').classList.add('show');
+}
+
+function fromViewToEdit() {
+  closeViewModal();
+  editAccount(currentAccountId);
+}
+
+function editAccount(id) {
+  editingAccount = true;
+  currentAccountId = id;
+  const account = accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  document.getElementById('accountModalTitle').textContent = 'Edit Account';
+  const form = document.getElementById('accountForm');
+  form.accountId.value = account.id;
+  form.companyName.value = account.companyName;
+  form.username.value = account.username;
+  form.email.value = account.email;
+  form.password.value = account.password;
+  form.price.value = account.price;
+  form.paymentTerm.value = account.paymentTerm;
+  form.status.value = account.status;
+  form.address.value = account.address || '';
+  
+  const toggle = document.getElementById('autoRenewToggle');
+  if (account.autoRenew) toggle.classList.add('active');
+  else toggle.classList.remove('active');
+  
+  document.getElementById('accountModal').classList.add('show');
+}
+
+function editPrice(id) {
+  currentAccountId = id;
+  const account = accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  document.getElementById('currentPriceDisplay').value = '$' + account.price.toFixed(2);
+  document.getElementById('newPrice').value = '';
+  document.getElementById('priceChangeReason').value = '';
+  document.getElementById('priceModal').classList.add('show');
+}
+
+function savePriceChange() {
+  const newPrice = parseFloat(document.getElementById('newPrice').value);
+  if (!newPrice || newPrice <= 0) {
+    showToast('error', 'Invalid Price', 'Please enter a valid price');
+    return;
+  }
+  
+  const index = accounts.findIndex(a => a.id === currentAccountId);
+  if (index === -1) return;
+  
+  accounts[index].price = newPrice;
+  renderAccounts();
+  updateStats();
+  closePriceModal();
+  showToast('success', 'Price Updated', `New price: $${newPrice.toFixed(2)}`);
+}
+
+function resetPassword(id) {
+  currentAccountId = id;
+  const account = accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  document.getElementById('resetAccountName').value = account.companyName;
+  document.getElementById('resetAccountEmail').value = account.email;
+  document.getElementById('resetModal').classList.add('show');
+}
+
+function confirmResetPassword() {
+  closeResetModal();
+  showToast('success', 'Password Reset', 'New password sent to email');
+}
+
+function sendReminder(id) {
+  const account = accounts.find(a => a.id === id);
+  showToast('success', 'Reminder Sent', `Payment reminder sent to ${account.companyName}`);
+}
+
+function toggleSuspend(id) {
+  const index = accounts.findIndex(a => a.id === id);
+  if (index === -1) return;
+  
+  const newStatus = accounts[index].status === 'suspended' ? 'active' : 'suspended';
+  accounts[index].status = newStatus;
+  
+  renderAccounts();
+  updateStats();
+  showToast('success', 'Status Changed', `Account ${newStatus === 'active' ? 'activated' : 'suspended'}`);
+}
+
+function deleteAccount(id) {
+  currentAccountId = id;
+  const account = accounts.find(a => a.id === id);
+  if (!account) return;
+  
+  document.getElementById('deleteAccountName').value = account.companyName;
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function confirmDelete() {
+  accounts = accounts.filter(a => a.id !== currentAccountId);
+  renderAccounts();
+  updateStats();
+  closeDeleteModal();
+  showToast('success', 'Account Deleted', 'Account has been permanently deleted');
+}
+
+function generateInvoiceForAccount() {
+  closeViewModal();
+  showToast('success', 'Invoice Generated', 'Invoice created for this account');
+}
+
+// ==================== EXPORT ====================
+
+function exportAccounts() {
+  const csv = [
+    ['Company', 'Username', 'Email', 'Price', 'Term', 'Status', 'Auto Renew', 'Created'].join(','),
+    ...accounts.map(a => [
+      `"${a.companyName}"`, `"${a.username}"`, `"${a.email}"`, a.price, a.paymentTerm, a.status, a.autoRenew, a.createdDate
+    ].join(','))
+  ].join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `accounts_export_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showToast('success', 'Export Complete', 'Accounts exported to CSV');
+}
+
+// ==================== UTILITIES ====================
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function showToast(type, title, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <div class="icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ'}</div>
+    <div class="content">
+      <div class="title">${title}</div>
+      <div class="message">${message}</div>
+    </div>
+  `;
+  
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault();
+    openAddModal();
+  }
+});
+
+// Initialize
+init();
+</script>
+
+</body>
+</html>
