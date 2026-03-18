@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Everest Security — Admin Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#062026;
+  --panel:#0d1519;
+  --muted:#95a9b8;
+  --accent:#22c55e;
+  --accent-2:#9ef07e;
+  --accent-glow:rgba(34,197,94,0.3);
+  --glass: rgba(255,255,255,0.03);
+  --danger:#ef4444;
+  --warning:#fbbf24;
+  --info:#60a5fa;
+  --purple:#a855f7;
+  --orange:#f97316;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background: linear-gradient(180deg, #02110d 0%, #062026 100%);
+  color:#e7f3f7;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+
+/* Animated background */
+.bg-animation{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+.bg-animation::before{
+  content:'';
+  position:absolute;
+  width:600px;
+  height:600px;
+  background:radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%);
+  top:-200px;
+  right:-200px;
+  animation:pulse 8s ease-in-out infinite;
+}
+.bg-animation::after{
+  content:'';
+  position:absolute;
+  width:400px;
+  height:400px;
+  background:radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 70%);
+  bottom:-100px;
+  left:-100px;
+  animation:pulse 10s ease-in-out infinite reverse;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1); opacity:0.5; }
+  50%{ transform:scale(1.2); opacity:0.8; }
+}
+
+.page-frame{
+  max-width:1400px;
+  margin:16px auto;
+  padding:12px;
+  border-radius:16px;
+  background: linear-gradient(135deg, rgba(0,255,106,0.15), rgba(0,255,106,0.05));
+  box-shadow: 0 28px 80px rgba(2,10,8,0.5);
+  position:relative;
+  z-index:1;
+}
+
+.app {
+  display:flex;
+  gap:12px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(8,12,14,0.98), rgba(5,8,10,0.95));
+  padding:12px;
+  border:1px solid rgba(255,255,255,0.04);
+  backdrop-filter:blur(10px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg, rgba(2,6,10,0.95), rgba(1,4,8,0.92));
+  padding:16px;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  border-right:1px solid rgba(255,255,255,0.03);
+  position:sticky;
+  top:16px;
+  height:calc(100vh - 56px);
+  overflow-y:auto;
+}
+.brand{ 
+  color:var(--accent); 
+  font-weight:800; 
+  font-size:18px; 
+  display:flex; 
+  gap:10px; 
+  align-items:center;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.brand .logo-dot{ 
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); 
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center; 
+  color:#042017; 
+  font-weight:800; 
+  font-size:16px;
+  box-shadow:0 4px 20px var(--accent-glow);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{ box-shadow:0 4px 20px var(--accent-glow); }
+  50%{ box-shadow:0 4px 30px var(--accent-glow), 0 0 40px var(--accent-glow); }
+}
+
+.searchbox{ 
+  background:var(--glass); 
+  border-radius:10px; 
+  padding:12px 14px; 
+  color:var(--muted); 
+  font-size:13px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.2s;
+  cursor:text;
+}
+.searchbox:hover, .searchbox:focus-within{
+  border-color:rgba(34,197,94,0.3);
+  background:rgba(255,255,255,0.05);
+}
+.menu { margin-top:4px; display:flex; flex-direction:column; gap:4px; }
+.menu .section{ 
+  color:var(--muted); 
+  font-size:10px; 
+  margin-top:12px; 
+  margin-bottom:4px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:600;
+}
+.menu a{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  color:#b8d4c8; 
+  text-decoration:none; 
+  padding:10px 12px; 
+  border-radius:10px; 
+  font-size:13.5px;
+  font-weight:500;
+  transition:all 0.2s ease;
+  position:relative;
+  overflow:hidden;
+}
+.menu a::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:var(--accent);
+  transform:scaleY(0);
+  transition:transform 0.2s;
+  border-radius:0 3px 3px 0;
+}
+.menu a:hover{ 
+  background:rgba(255,255,255,0.04);
+  color:#fff;
+  transform:translateX(4px);
+}
+.menu a.active{ 
+  background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05));
+  color:#fff;
+}
+.menu a.active::before{ transform:scaleY(1); }
+.menu a .icon{ font-size:16px; }
+
+/* Live indicator */
+.live-indicator{
+  margin-top:auto;
+  padding:14px;
+  background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.02));
+  border-radius:10px;
+  border:1px solid rgba(34,197,94,0.15);
+}
+.live-indicator .status{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  font-weight:500;
+}
+.live-indicator .pulse{
+  width:10px;
+  height:10px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.3); opacity:0.7; }
+}
+.live-indicator .company{ 
+  margin-top:8px; 
+  font-size:12px; 
+  color:var(--muted);
+}
+
+/* CENTER */
+.center { 
+  flex:1; 
+  border-radius:12px; 
+  padding:12px; 
+  display:flex; 
+  flex-direction:column; 
+  gap:12px;
+  overflow:hidden;
+}
+
+.header { 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  gap:12px;
+  padding:8px 4px;
+}
+.breadcrumbs{ color:var(--muted); font-size:12px; display:flex; gap:8px; align-items:center; }
+.breadcrumbs a{ color:var(--muted); text-decoration:none; transition:color 0.2s; }
+.breadcrumbs a:hover{ color:var(--accent); }
+.header h1{ margin:0; font-size:22px; font-weight:700; }
+
+.header-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* Notification bell */
+.notif-bell{
+  position:relative;
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,0.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+  transition:all 0.2s;
+}
+.notif-bell:hover{ background:rgba(255,255,255,0.08); transform:scale(1.05); }
+.notif-bell .badge{
+  position:absolute;
+  top:-4px;
+  right:-4px;
+  width:20px;
+  height:20px;
+  background:var(--danger);
+  border-radius:50%;
+  font-size:10px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:bounce 0.5s ease infinite alternate;
+}
+@keyframes bounce{ to{ transform:translateY(-2px); } }
+
+/* User menu */
+.user-menu{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 14px;
+  background:var(--glass);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.user-menu:hover{ background:rgba(255,255,255,0.06); }
+.user-menu .avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#042017;
+  font-size:13px;
+}
+.user-menu .info{ text-align:right; }
+.user-menu .name{ font-size:13px; font-weight:600; }
+.user-menu .role{ font-size:11px; color:var(--muted); }
+
+/* Stats Cards */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
+}
+.stat-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  padding:18px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+}
+.stat-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform:scaleX(0);
+  transition:transform 0.3s;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(34,197,94,0.2);
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+.stat-card:hover::before{ transform:scaleX(1); }
+.stat-card .header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+.stat-card .icon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+}
+.stat-card .icon.green{ background:rgba(34,197,94,0.15); }
+.stat-card .icon.blue{ background:rgba(96,165,250,0.15); }
+.stat-card .icon.purple{ background:rgba(168,85,247,0.15); }
+.stat-card .icon.orange{ background:rgba(249,115,22,0.15); }
+.stat-card .label{ color:var(--muted); font-size:12px; font-weight:500; }
+.stat-card .value{ 
+  font-weight:800; 
+  font-size:28px; 
+  margin-top:4px;
+  background:linear-gradient(135deg, #fff, #b8d4c8);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.stat-card .change{ 
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  margin-top:8px;
+  font-weight:500;
+}
+.stat-card .change.up{ color:var(--accent); }
+.stat-card .change.down{ color:var(--danger); }
+.stat-card .sparkline{
+  position:absolute;
+  bottom:0;
+  right:0;
+  width:80px;
+  height:40px;
+  opacity:0.3;
+}
+
+/* Main Grid */
+.main-grid{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:12px;
+}
+
+/* Panel */
+.panel{
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:18px;
+}
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.panel-title{ 
+  font-size:15px; 
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.panel-title .dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--accent);
+  animation:pulse-dot 2s infinite;
+}
+.panel-actions{ display:flex; gap:8px; }
+.btn-icon{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:14px;
+  transition:all 0.2s;
+}
+.btn-icon:hover{ 
+  background:rgba(255,255,255,0.06); 
+  color:#fff;
+  transform:scale(1.05);
+}
+
+/* Chart container */
+.chart-container{
+  position:relative;
+  height:280px;
+}
+.chart-legend{
+  display:flex;
+  gap:20px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.chart-legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:var(--muted);
+}
+.chart-legend-item .color{
+  width:12px;
+  height:12px;
+  border-radius:3px;
+}
+
+/* Activity Feed */
+.activity-list{ display:flex; flex-direction:column; gap:10px; }
+.activity-item{
+  display:flex;
+  gap:14px;
+  padding:14px;
+  background:var(--glass);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.03);
+  transition:all 0.2s;
+  cursor:pointer;
+}
+.activity-item:hover{
+  background:rgba(255,255,255,0.05);
+  transform:translateX(4px);
+}
+.activity-item .icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.activity-item .icon.success{ background:rgba(34,197,94,0.15); }
+.activity-item .icon.warning{ background:rgba(251,191,36,0.15); }
+.activity-item .icon.info{ background:rgba(96,165,250,0.15); }
+.activity-item .content{ flex:1; }
+.activity-item .title{ font-size:13px; font-weight:600; }
+.activity-item .desc{ font-size:12px; color:var(--muted); margin-top:2px; }
+.activity-item .time{ font-size:11px; color:var(--muted); margin-top:6px; }
+
+/* Customer Table */
+.table-wrap{ overflow:auto; max-height:320px; }
+table{ width:100%; border-collapse:collapse; color:#e3f7ee; font-size:13px; }
+thead th{ 
+  text-align:left; 
+  padding:12px; 
+  color:var(--muted); 
+  font-size:11px; 
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  position:sticky; 
+  top:0; 
+  background:rgba(10,14,16,0.98);
+  z-index:1;
+  font-weight:600;
+}
+tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+tbody tr{ transition:all 0.2s; }
+tbody tr:hover{ 
+  background:linear-gradient(90deg, rgba(34,197,94,0.05), transparent);
+  cursor:pointer;
+}
+.customer-cell{ display:flex; align-items:center; gap:12px; }
+.customer-avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #3a7bd5, #00d2ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:13px;
+  color:#fff;
+}
+.customer-info{ display:flex; flex-direction:column; }
+.customer-name{ font-weight:600; font-size:13px; }
+.customer-email{ color:var(--muted); font-size:11px; margin-top:2px; }
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+}
+.status-pill.active{ background:rgba(34,197,94,0.15); color:var(--accent); }
+.status-pill.warning{ background:rgba(251,191,36,0.15); color:var(--warning); }
+.status-pill.danger{ background:rgba(239,68,68,0.15); color:var(--danger); }
+.trend{ font-size:12px; font-weight:600; }
+.trend.up{ color:var(--accent); }
+.trend.down{ color:var(--danger); }
+
+/* Quick Actions */
+.quick-actions{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+  margin-top:12px;
+}
+.quick-action{
+  padding:16px;
+  background:var(--glass);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.04);
+  cursor:pointer;
+  transition:all 0.2s;
+  text-align:center;
+}
+.quick-action:hover{
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(34,197,94,0.3);
+  transform:translateY(-2px);
+}
+.quick-action .icon{
+  font-size:24px;
+  margin-bottom:8px;
+}
+.quick-action .label{ font-size:12px; font-weight:500; }
+
+/* Progress bars */
+.progress-item{ margin-bottom:14px; }
+.progress-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:12px;
+}
+.progress-bar{
+  height:8px;
+  background:rgba(255,255,255,0.06);
+  border-radius:4px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  border-radius:4px;
+  transition:width 0.5s ease;
+  position:relative;
+}
+.progress-fill::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{
+  0%{ transform:translateX(-100%); }
+  100%{ transform:translateX(100%); }
+}
+
+/* Right sidebar */
+.right-sidebar{
+  width:200px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* Mini cards */
+.mini-card{
+  padding:16px;
+  background:linear-gradient(180deg, rgba(10,14,16,0.8), rgba(6,10,12,0.6));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:12px;
+}
+.mini-card h3{ margin:0 0 12px 0; font-size:13px; font-weight:700; }
+
+/* Calendar widget */
+.calendar-widget{
+  padding:14px;
+  background:var(--glass);
+  border-radius:12px;
+}
+.calendar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.calendar-header button{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+}
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:4px;
+  text-align:center;
+}
+.calendar-grid .day-label{
+  font-size:10px;
+  color:var(--muted);
+  padding:6px;
+}
+.calendar-grid .day{
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.calendar-grid .day:hover{ background:rgba(255,255,255,0.06); }
+.calendar-grid .day.today{ 
+  background:var(--accent); 
+  color:#042017;
+  font-weight:700;
+}
+.calendar-grid .day.has-event{ 
+  position:relative;
+}
+.calendar-grid .day.has-event::after{
+  content:'';
+  position:absolute;
+  bottom:4px;
+  width:4px;
+  height:4px;
+  background:var(--warning);
+  border-radius:50%;
+}
+
+/* Toast notifications */
+.toast-container{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  z-index:2000;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.toast{
+  background:linear-gradient(135deg, rgba(10,14,16,0.98), rgba(6,10,12,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transform:translateX(400px);
+  opacity:0;
+  transition:all 0.3s ease;
+  min-width:280px;
+}
+.toast.show{ transform:translateX(0); opacity:1; }
+.toast .icon{ font-size:20px; }
+.toast.success{ border-color:rgba(34,197,94,0.3); }
+.toast.warning{ border-color:rgba(251,191,36,0.3); }
+.toast.error{ border-color:rgba(239,68,68,0.3); }
+.toast .content{ flex:1; }
+.toast .title{ font-weight:600; font-size:13px; }
+.toast .message{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Modal */
+.modal-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.modal-overlay.show{ display:flex; }
+.modal{
+  background:linear-gradient(180deg, rgba(12,16,18,0.98), rgba(8,12,14,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  width:100%;
+  max-width:500px;
+  max-height:90vh;
+  overflow:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  animation:modalIn 0.3s ease;
+}
+@keyframes modalIn{
+  from{ transform:scale(0.9); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.modal-header h2{ margin:0; font-size:18px; }
+.modal-close{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  font-size:24px;
+  cursor:pointer;
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.modal-close:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+.modal-body{ padding:24px; }
+
+/* Responsive */
+@media (max-width:1200px){
+  .main-grid{ grid-template-columns:1fr; }
+  .right-sidebar{ display:none; }
+  .stats-row{ grid-template-columns:repeat(2, 1fr); }
+}
+@media (max-width:768px){
+  .sidebar{ display:none; }
+  .stats-row{ grid-template-columns:1fr; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="bg-animation"></div>
+
+<div class="page-frame">
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-dot">E</div>
+        Everest Admin
+      </div>
+      
+      <div class="searchbox">🔍 Search anything...</div>
+
+      <nav class="menu">
+        <div class="section">Dashboards</div>
+        <a class="active" href="admin.html"><span class="icon">📊</span> Overview</a>
+        <a href="accounts.html"><span class="icon">👥</span> Accounts</a>
+        <a href="analytics.html"><span class="icon">📈</span> Analytics</a>
+        <a href="invoices.html"><span class="icon">🧾</span> Invoices</a>
+        
+        <div class="section">Management</div>
+        <a href="#"><span class="icon">💬</span> Messages <span style="margin-left:auto;background:var(--danger);padding:2px 8px;border-radius:10px;font-size:10px;">3</span></a>
+        <a href="#"><span class="icon">⭐</span> Reviews</a>
+        <a href="#"><span class="icon">❓</span> Help Centre</a>
+        
+        <div class="section">Settings</div>
+        <a href="#"><span class="icon">⚙</span> Configuration</a>
+        <a href="#"><span class="icon">🔐</span> Security</a>
+      </nav>
+
+      <div class="live-indicator">
+        <div class="status">
+          <div class="pulse"></div>
+          <span>System Online</span>
+        </div>
+        <div class="company">Everest Security Pvt. Ltd.</div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <section class="center">
+
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="#">Dashboard</a> / <span style="color:#fff;">Overview</span>
+          </div>
+          <h1>Dashboard Overview</h1>
+        </div>
+
+        <div class="header-actions">
+          <div class="notif-bell" onclick="showNotifications()">
+            🔔
+            <span class="badge">5</span>
+          </div>
+          <div class="user-menu" onclick="showUserMenu()">
+            <div class="info">
+              <div class="name">Admin User</div>
+              <div class="role">Super Administrator</div>
+            </div>
+            <div class="avatar">AU</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card" onclick="showRevenueDetails()">
+          <div class="header-row">
+            <div>
+              <div class="label">Total Revenue</div>
+              <div class="value" id="revenueValue">$0</div>
+              <div class="change up">
+                <span>↗</span> <span id="revenueChange">+12.5%</span> vs last month
+              </div>
+            </div>
+            <div class="icon green">💰</div>
+          </div>
+        </div>
+        
+        <div class="stat-card" onclick="showAccountsDetails()">
+          <div class="header-row">
+            <div>
+              <div class="label">Active Accounts</div>
+              <div class="value" id="accountsValue">0</div>
+              <div class="change up">
+                <span>↗</span> <span id="accountsChange">+8</span> new this week
+              </div>
+            </div>
+            <div class="icon blue">👥</div>
+          </div>
+        </div>
+        
+        <div class="stat-card" onclick="showInvoicesDetails()">
+          <div class="header-row">
+            <div>
+              <div class="label">Pending Invoices</div>
+              <div class="value" id="pendingValue">$0</div>
+              <div class="change down">
+                <span>↘</span> <span id="pendingChange">-3</span> from yesterday
+              </div>
+            </div>
+            <div class="icon purple">🧾</div>
+          </div>
+        </div>
+        
+        <div class="stat-card" onclick="showAlertsDetails()">
+          <div class="header-row">
+            <div>
+              <div class="label">System Alerts</div>
+              <div class="value" id="alertsValue">0</div>
+              <div class="change up" style="color:var(--warning);">
+                <span>⚠</span> <span id="alertsText">2 critical</span>
+              </div>
+            </div>
+            <div class="icon orange">🔔</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="main-grid">
+        <div class="left-col">
+          
+          <!-- Revenue Chart -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                Revenue Analytics
+              </div>
+              <div class="panel-actions">
+                <button class="btn-icon" onclick="refreshChart()" title="Refresh">🔄</button>
+                <button class="btn-icon" onclick="exportChart()" title="Export">📥</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="color" style="background:var(--accent)"></div>
+                <span>Revenue</span>
+              </div>
+              <div class="chart-legend-item">
+                <div class="color" style="background:var(--info)"></div>
+                <span>Projected</span>
+              </div>
+              <div class="chart-legend-item">
+                <div class="color" style="background:var(--warning)"></div>
+                <span>Expenses</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Customers -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                Recent Customers
+              </div>
+              <div class="panel-actions">
+                <button class="btn-icon" onclick="viewAllCustomers()" title="View All">→</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="customersTable">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Revenue</th>
+                    <th>Trend</th>
+                  </tr>
+                </thead>
+                <tbody id="customersBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+          
+          <!-- Activity Feed -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                Live Activity
+              </div>
+              <div class="panel-actions">
+                <button class="btn-icon" onclick="clearActivity()" title="Clear">🗑</button>
+              </div>
+            </div>
+            <div class="activity-list" id="activityList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Goals Progress -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                Monthly Goals
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span>Revenue Target</span>
+                <span style="color:var(--accent)" id="revenueGoalText">71%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="revenueGoalBar" style="width:71%;background:linear-gradient(90deg,var(--accent),var(--accent-2));"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span>New Customers</span>
+                <span style="color:var(--info)" id="customerGoalText">85%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="customerGoalBar" style="width:85%;background:linear-gradient(90deg,var(--info),#93c5fd);"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span>Collection Rate</span>
+                <span style="color:var(--warning)" id="collectionGoalText">62%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="collectionGoalBar" style="width:62%;background:linear-gradient(90deg,var(--warning),#fcd34d);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="dot"></span>
+                Calendar
+              </div>
+            </div>
+            <div class="calendar-widget" id="calendarWidget">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      
+      <div class="mini-card">
+        <h3>⚡ Quick Actions</h3>
+        <div class="quick-actions">
+          <div class="quick-action" onclick="quickAction('invoice')">
+            <div class="icon">🧾</div>
+            <div class="label">New Invoice</div>
+          </div>
+          <div class="quick-action" onclick="quickAction('account')">
+            <div class="icon">👤</div>
+            <div class="label">Add Account</div>
+          </div>
+          <div class="quick-action" onclick="quickAction('report')">
+            <div class="icon">📊</div>
+            <div class="label">Report</div>
+          </div>
+          <div class="quick-action" onclick="quickAction('support')">
+            <div class="icon">🎧</div>
+            <div class="label">Support</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <h3>📊 Server Status</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--muted);">CPU Usage</span>
+            <span style="font-size:12px; color:var(--accent); font-weight:600;" id="cpuUsage">42%</span>
+          </div>
+          <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
+            <div id="cpuBar" style="width:42%; height:100%; background:var(--accent); border-radius:3px; transition:width 0.5s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:12px; color:var(--muted);">Memory</span>
+            <span style="font-size:12px; color:var(--info); font-weight:600;" id="memUsage">68%</span>
+          </div>
+          <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
+            <div id="memBar" style="width:68%; height:100%; background:var(--info); border-radius:3px; transition:width 0.5s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:12px; color:var(--muted);">Uptime</span>
+            <span style="font-size:12px; color:var(--purple); font-weight:600;">99.9%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <h3>🎯 Top Performers</h3>
+        <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;" id="topPerformers">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Notification Modal -->
+<div id="notifModal" class="modal-overlay" onclick="closeNotifModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🔔 Notifications</h2>
+      <button class="modal-close" onclick="closeNotifModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="notifList">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== REAL-TIME DATA SYSTEM ====================
+
+// Initial data
+let dashboardData = {
+  revenue: 3131021,
+  revenueChange: 12.5,
+  accounts: 1247,
+  accountsChange: 8,
+  pendingInvoices: 45230,
+  pendingChange: -3,
+  alerts: 5,
+  criticalAlerts: 2,
+  goals: {
+    revenue: 71,
+    customers: 85,
+    collection: 62
+  }
+};
+
+let customers = [
+  { id: 1, name: "TechCorp Solutions", email: "admin@techcorp.com", status: "active", revenue: 37431, trend: 12, avatar: "TC" },
+  { id: 2, name: "Global Finance Ltd", email: "billing@globalfin.com", status: "active", revenue: 30423, trend: 8, avatar: "GF" },
+  { id: 3, name: "RetailMax Stores", email: "finance@retailmax.com", status: "warning", revenue: 28549, trend: -3, avatar: "RS" },
+  { id: 4, name: "HealthFirst Medical", email: "accounts@healthfirst.com", status: "active", revenue: 21100, trend: 15, avatar: "HM" },
+  { id: 5, name: "EduLearn Academy", email: "billing@edulearn.com", status: "active", revenue: 18420, trend: 5, avatar: "EA" },
+  { id: 6, name: "Manufacturing Pro", email: "finance@manupro.com", status: "danger", revenue: 16450, trend: -8, avatar: "MP" }
+];
+
+let activities = [];
+let notifications = [
+  { id: 1, title: "New payment received", message: "TechCorp Solutions paid $2,999", time: "2 min ago", type: "success", read: false },
+  { id: 2, title: "Account suspended", message: "RetailMax Stores - payment overdue", time: "15 min ago", type: "warning", read: false },
+  { id: 3, title: "New account created", message: "CloudNine Services registered", time: "1 hour ago", type: "success", read: true },
+  { id: 4, title: "Server alert", message: "High CPU usage detected", time: "2 hours ago", type: "error", read: false },
+  { id: 5, title: "Invoice generated", message: "Monthly invoices created successfully", time: "3 hours ago", type: "success", read: true }
+];
+
+// ==================== INITIALIZATION ====================
+
+function init() {
+  updateStats();
+  renderCustomers();
+  renderActivity();
+  renderCalendar();
+  renderTopPerformers();
+  initCharts();
+  generateInitialActivity();
+  
+  // Start real-time updates
+  setInterval(simulateRealTimeUpdates, 3000);
+  setInterval(updateServerStats, 2000);
+  setInterval(addRandomActivity, 8000);
+}
+
+// ==================== REAL-TIME UPDATES ====================
+
+function simulateRealTimeUpdates() {
+  // Randomly fluctuate revenue
+  const change = (Math.random() - 0.5) * 1000;
+  dashboardData.revenue += change;
+  dashboardData.revenueChange += (Math.random() - 0.5) * 0.5;
+  
+  // Update accounts
+  if (Math.random() > 0.7) {
+    dashboardData.accounts += Math.random() > 0.5 ? 1 : 0;
+  }
+  
+  // Update goals
+  dashboardData.goals.revenue = Math.min(100, dashboardData.goals.revenue + (Math.random() - 0.4) * 2);
+  
+  updateStats();
+  updateCharts();
+}
+
+function updateServerStats() {
+  const cpu = Math.floor(30 + Math.random() * 40);
+  const mem = Math.floor(50 + Math.random() * 30);
+  
+  document.getElementById('cpuUsage').textContent = cpu + '%';
+  document.getElementById('cpuBar').style.width = cpu + '%';
+  document.getElementById('memUsage').textContent = mem + '%';
+  document.getElementById('memBar').style.width = mem + '%';
+}
+
+// ==================== STATS DISPLAY ====================
+
+function updateStats() {
+  // Revenue
+  animateNumber('revenueValue', dashboardData.revenue, '$');
+  document.getElementById('revenueChange').textContent = (dashboardData.revenueChange > 0 ? '+' : '') + dashboardData.revenueChange.toFixed(1) + '%';
+  
+  // Accounts
+  animateNumber('accountsValue', dashboardData.accounts, '');
+  document.getElementById('accountsChange').textContent = '+' + dashboardData.accountsChange;
+  
+  // Pending
+  animateNumber('pendingValue', dashboardData.pendingInvoices, '$');
+  document.getElementById('pendingChange').textContent = (dashboardData.pendingChange > 0 ? '+' : '') + dashboardData.pendingChange;
+  
+  // Alerts
+  document.getElementById('alertsValue').textContent = dashboardData.alerts;
+  document.getElementById('alertsText').textContent = dashboardData.criticalAlerts + ' critical';
+  
+  // Goals
+  document.getElementById('revenueGoalText').textContent = Math.floor(dashboardData.goals.revenue) + '%';
+  document.getElementById('revenueGoalBar').style.width = dashboardData.goals.revenue + '%';
+}
+
+function animateNumber(id, value, prefix = '') {
+  const el = document.getElementById(id);
+  const current = parseFloat(el.textContent.replace(/[^0-9.-]/g, '')) || 0;
+  const target = value;
+  const diff = target - current;
+  
+  if (Math.abs(diff) < 1) {
+    el.textContent = prefix + Math.floor(target).toLocaleString();
+    return;
+  }
+  
+  const step = diff * 0.1;
+  const newValue = current + step;
+  el.textContent = prefix + Math.floor(newValue).toLocaleString();
+}
+
+// ==================== CUSTOMERS TABLE ====================
+
+function renderCustomers() {
+  const tbody = document.getElementById('customersBody');
+  tbody.innerHTML = customers.map(c => `
+    <tr onclick="viewCustomer(${c.id})">
+      <td>
+        <div class="customer-cell">
+          <div class="customer-avatar">${c.avatar}</div>
+          <div class="customer-info">
+            <span class="customer-name">${c.name}</span>
+            <span class="customer-email">${c.email}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="status-pill ${c.status}">
+          <span class="status-dot"></span>
+          ${c.status.charAt(0).toUpperCase() + c.status.slice(1)}
+        </span>
+      </td>
+      <td style="font-weight:600;">$${c.revenue.toLocaleString()}</td>
+      <td class="trend ${c.trend > 0 ? 'up' : 'down'}">
+        ${c.trend > 0 ? '↗' : '↘'} ${Math.abs(c.trend)}%
+      </td>
+    </tr>
+  `).join('');
+}
+
+function viewCustomer(id) {
+  const customer = customers.find(c => c.id === id);
+  showToast('success', 'Customer Selected', `Opening ${customer.name} details...`);
+}
+
+// ==================== ACTIVITY FEED ====================
+
+function generateInitialActivity() {
+  const initialActivities = [
+    { icon: '💰', type: 'success', title: 'Payment Received', desc: 'TechCorp Solutions - $2,999', time: '2 min ago' },
+    { icon: '👤', type: 'info', title: 'New Registration', desc: 'CloudNine Services joined', time: '15 min ago' },
+    { icon: '⚠', type: 'warning', title: 'Payment Overdue', desc: 'RetailMax Stores - 5 days', time: '32 min ago' },
+    { icon: '🧾', type: 'info', title: 'Invoice Generated', desc: 'Monthly batch completed', time: '1 hour ago' },
+    { icon: '✅', type: 'success', title: 'Account Activated', desc: 'HealthFirst Medical', time: '2 hours ago' }
+  ];
+  
+  activities = initialActivities;
+  renderActivity();
+}
+
+function renderActivity() {
+  const list = document.getElementById('activityList');
+  list.innerHTML = activities.map(a => `
+    <div class="activity-item" onclick="viewActivity('${a.title}')">
+      <div class="icon ${a.type}">${a.icon}</div>
+      <div class="content">
+        <div class="title">${a.title}</div>
+        <div class="desc">${a.desc}</div>
+        <div class="time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addRandomActivity() {
+  const newActivities = [
+    { icon: '💰', type: 'success', title: 'Payment Received', desc: `Payment from ${customers[Math.floor(Math.random() * customers.length)].name}`, time: 'Just now' },
+    { icon: '📧', type: 'info', title: 'Email Sent', desc: 'Invoice reminder sent to client', time: 'Just now' },
+    { icon: '🔄', type: 'info', title: 'Status Updated', desc: 'Account status changed to Active', time: 'Just now' },
+    { icon: '⚡', type: 'success', title: 'Auto-Renewal', desc: 'Subscription renewed successfully', time: 'Just now' }
+  ];
+  
+  const newActivity = newActivities[Math.floor(Math.random() * newActivities.length)];
+  activities.unshift(newActivity);
+  if (activities.length > 10) activities.pop();
+  
+  renderActivity();
+  
+  // Show toast for important activities
+  if (Math.random() > 0.7) {
+    showToast(newActivity.type, newActivity.title, newActivity.desc);
+  }
+}
+
+function viewActivity(title) {
+  showToast('info', 'Activity Details', `Viewing details for: ${title}`);
+}
+
+function clearActivity() {
+  activities = [];
+  renderActivity();
+  showToast('success', 'Cleared', 'Activity feed cleared');
+}
+
+// ==================== CALENDAR ====================
+
+function renderCalendar() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  
+  let html = `
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">‹</button>
+      <span style="font-weight:600; font-size:13px;">${monthNames[month]} ${year}</span>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="calendar-grid">
+      ${dayNames.map(d => `<div class="day-label">${d}</div>`).join('')}
+  `;
+  
+  for (let i = 0; i < firstDay; i++) {
+    html += '<div class="day"></div>';
+  }
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = day === now.getDate();
+    const hasEvent = [5, 12, 18, 25].includes(day);
+    html += `<div class="day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}">${day}</div>`;
+  }
+  
+  html += '</div>';
+  document.getElementById('calendarWidget').innerHTML = html;
+}
+
+function changeMonth(dir) {
+  // Simplified - would update calendar state
+  showToast('info', 'Calendar', 'Month navigation (demo)');
+}
+
+// ==================== TOP PERFORMERS ====================
+
+function renderTopPerformers() {
+  const performers = customers.slice(0, 3);
+  document.getElementById('topPerformers').innerHTML = performers.map((p, i) => `
+    <div style="display:flex; align-items:center; gap:10px; padding:10px; background:var(--glass); border-radius:8px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:${i === 0 ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : i === 1 ? 'linear-gradient(135deg,#9ca3af,#6b7280)' : 'linear-gradient(135deg,#a855f7,#7c3aed)'}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">
+        ${i + 1}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:12px; font-weight:600;">${p.name}</div>
+        <div style="font-size:11px; color:var(--muted);">$${p.revenue.toLocaleString()}</div>
+      </div>
+      <div style="color:var(--accent); font-size:12px; font-weight:600;">+${p.trend}%</div>
+    </div>
+  `).join('');
+}
+
+// ==================== CHARTS ====================
+
+let revenueChart;
+
+function initCharts() {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  
+  // Generate initial data
+  const labels = Array.from({length: 12}, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 11 + i);
+    return d.toLocaleDateString('en-US', { month: 'short' });
+  });
+  
+  const revenueData = labels.map(() => Math.floor(200000 + Math.random() * 150000));
+  const projectedData = revenueData.map(v => v * 1.1);
+  const expenseData = revenueData.map(v => v * 0.4);
+  
+  revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: revenueData,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2
+        },
+        {
+          label: 'Projected',
+          data: projectedData,
+          borderColor: '#60a5fa',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          tension: 0.4,
+          borderWidth: 2
+        },
+        {
+          label: 'Expenses',
+          data: expenseData,
+          borderColor: '#fbbf24',
+          backgroundColor: 'transparent',
+          tension: 0.4,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,14,16,0.95)',
+          titleColor: '#fff',
+          bodyColor: '#e7f3f7',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: {
+            color: '#95a9b8',
+            callback: function(value) {
+              return '$' + (value / 1000) + 'k';
+            }
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#95a9b8' }
+        }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  if (!revenueChart) return;
+  
+  // Update last data point
+  const lastIndex = revenueChart.data.datasets[0].data.length - 1;
+  revenueChart.data.datasets[0].data[lastIndex] = dashboardData.revenue / 12;
+  revenueChart.update('none');
+}
+
+function refreshChart() {
+  // Simulate data refresh
+  revenueChart.data.datasets.forEach(dataset => {
+    dataset.data = dataset.data.map(() => Math.floor(200000 + Math.random() * 150000));
+  });
+  revenueChart.update();
+  showToast('success', 'Chart Updated', 'Revenue data refreshed');
+}
+
+function exportChart() {
+  showToast('info', 'Export', 'Chart exported as PNG');
+}
+
+// ==================== NOTIFICATIONS ====================
+
+function showNotifications() {
+  const list = document.getElementById('notifList');
+  list.innerHTML = notifications.map(n => `
+    <div style="display:flex; gap:14px; padding:14px; ${n.read ? '' : 'background:rgba(34,197,94,0.05);'} border-radius:10px; margin-bottom:10px; cursor:pointer;" onclick="markNotifRead(${n.id})">
+      <div style="font-size:24px;">${n.type === 'success' ? '✅' : n.type === 'warning' ? '⚠' : n.type === 'error' ? '❌' : 'ℹ'}</div>
+      <div style="flex:1;">
+        <div style="font-weight:600; font-size:13px;">${n.title} ${n.read ? '' : '<span style="color:var(--accent); font-size:10px;">NEW</span>'}</div>
+        <div style="font-size:12px; color:var(--muted); margin-top:2px;">${n.message}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">${n.time}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('notifModal').classList.add('show');
+}
+
+function closeNotifModal(e) {
+  if (!e || e.target === document.getElementById('notifModal')) {
+    document.getElementById('notifModal').classList.remove('show');
+  }
+}
+
+function markNotifRead(id) {
+  const notif = notifications.find(n => n.id === id);
+  if (notif) {
+    notif.read = true;
+    showNotifications();
+  }
+}
+
+// ==================== QUICK ACTIONS ====================
+
+function quickAction(type) {
+  const actions = {
+    invoice: () => window.location.href = 'invoices.html',
+    account: () => window.location.href = 'accounts.html',
+    report: () => showToast('info', 'Reports', 'Opening reports...'),
+    support: () => showToast('info', 'Support', 'Opening support chat...')
+  };
+  
+  if (actions[type]) actions[type]();
+}
+
+function showUserMenu() {
+  showToast('info', 'User Menu', 'Profile, Settings, Logout options');
+}
+
+// ==================== TOAST SYSTEM ====================
+
+function showToast(type, title, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <div class="icon">${type === 'success' ? '✅' : type === 'warning' ? '⚠' : type === 'error' ? '❌' : 'ℹ'}</div>
+    <div class="content">
+      <div class="title">${title}</div>
+      <div class="message">${message}</div>
+    </div>
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// ==================== DETAIL VIEWS ====================
+
+function showRevenueDetails() {
+  showToast('info', 'Revenue Details', 'Opening detailed revenue breakdown...');
+}
+
+function showAccountsDetails() {
+  window.location.href = 'accounts.html';
+}
+
+function showInvoicesDetails() {
+  window.location.href = 'invoices.html';
+}
+
+function showAlertsDetails() {
+  showNotifications();
+}
+
+function viewAllCustomers() {
+  window.location.href = 'accounts.html';
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + K for search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.querySelector('.searchbox').focus();
+  }
+  
+  // Escape to close modals
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+  }
+  
+  // N for notifications
+  if (e.key === 'n' && !e.ctrlKey && !e.metaKey) {
+    showNotifications();
+  }
+});
+
+// Initialize
+init();
+</script>
+
+</body>
+</html>
