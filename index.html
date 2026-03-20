@@ -7,539 +7,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --navy:#082949;
-      --navy-2:#0b3d72;
-      --navy-3:#061f38;
-      --light:#e9f4ff;
-      --light-2:#f6fbff;
-      --orange:#ff7a00;
-      --text:#17324d;
-      --muted:#6d7d91;
-      --line:#e4edf6;
-      --card:#ffffff;
-      --shadow:0 12px 30px rgba(12,34,61,.10);
-      --shadow2:0 18px 45px rgba(12,34,61,.12);
-      --radius:18px;
-      --max:1180px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:#fff;
-    }
-    img{max-width:100%;display:block}
-    a{text-decoration:none;color:inherit}
-    button,input{font:inherit}
-    .container{width:min(var(--max),calc(100% - 32px));margin:0 auto}
-    .topbar{
-      height:58px;
-      background:var(--navy);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .topbar .row{
-      display:flex;justify-content:space-between;align-items:center;gap:18px;width:100%;
-      font-size:13px;
-      white-space:nowrap;
-    }
-    .top-left{display:flex;align-items:center;gap:14px;min-width:0}
-    .top-left .accent{color:var(--orange);font-weight:800}
-    .top-left .sep{opacity:.35}
-    .top-right{display:flex;align-items:center;gap:18px}
-    .top-right .item{display:flex;align-items:center;gap:8px;opacity:.96}
-    .top-right .item svg{width:18px;height:18px}
-    .login-pill{
-      background:#4a372f;
-      color:#fff;
-      padding:11px 20px;
-      border-radius:999px;
-      font-weight:700;
-      display:flex;align-items:center;gap:10px;
-    }
-
-    .navbar{
-      height:94px;
-      background:#fff;
-      border-bottom:1px solid #eef3f8;
-      display:flex;
-      align-items:center;
-      position:sticky;
-      top:0;
-      z-index:50;
-    }
-    .navbar .row{display:flex;align-items:center;justify-content:space-between;gap:18px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .brand-mark{
-      width:58px;height:58px;border-radius:14px;background:var(--navy-2);
-      display:grid;place-items:center;color:#fff;flex:none;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-    .brand-text{line-height:1}
-    .brand-text .name{
-      font-family:Rajdhani,Inter,sans-serif;
-      font-size:23px;
-      font-weight:800;
-      letter-spacing:.2px;
-      color:var(--navy-2);
-    }
-    .brand-text .sub{
-      display:block;
-      margin-top:2px;
-      font-family:Rajdhani,Inter,sans-serif;
-      color:var(--orange);
-      font-size:16px;
-      font-weight:700;
-      letter-spacing:1px;
-    }
-
-    .nav-links{
-      display:flex;align-items:center;gap:34px;
-      color:#3e4d61;
-      font-weight:600;
-    }
-    .nav-links a{
-      padding:14px 0;
-      position:relative;
-    }
-    .nav-links a.active{
-      color:var(--navy-2);
-      background:#eaf3ff;
-      padding:12px 18px;
-      border-radius:10px;
-    }
-    .nav-links a .caret{font-size:12px;opacity:.8;margin-left:4px}
-
-    .nav-actions{display:flex;align-items:center;gap:12px}
-    .btn{
-      border:none;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      border-radius:999px;
-      height:54px;
-      padding:0 22px;
-      font-weight:800;
-      transition:.18s ease;
-      white-space:nowrap;
-    }
-    .btn:hover{transform:translateY(-1px)}
-    .btn-outline{
-      background:#fff;
-      color:var(--navy-2);
-      border:1.5px solid #b3c8dd;
-    }
-    .btn-primary{
-      background:var(--navy-2);
-      color:#fff;
-      box-shadow:var(--shadow);
-    }
-    .btn-orange{
-      background:var(--orange);
-      color:#fff;
-      box-shadow:var(--shadow);
-    }
-    .btn-sm{height:38px;padding:0 16px;font-size:14px}
-    .menu-btn{
-      display:none;
-      width:46px;height:46px;border-radius:12px;
-      border:1px solid var(--line);
-      background:#fff;
-      align-items:center;justify-content:center;
-      cursor:pointer;
-    }
-
-    .mobile-nav{
-      display:none;
-      border-top:1px solid var(--line);
-      background:#fff;
-    }
-    .mobile-nav.open{display:block}
-    .mobile-nav .inner{
-      padding:10px 0 18px;
-      display:grid;gap:10px;
-    }
-    .mobile-nav a{
-      padding:12px 0;
-      border-bottom:1px solid #f0f4f8;
-      font-weight:700;
-      color:#36506d;
-    }
-
-    .hero{
-      background:
-        radial-gradient(circle at 15% 25%, rgba(255,255,255,.05) 0 1.8px, transparent 2px) 0 0/58px 58px,
-        radial-gradient(circle at 65% 75%, rgba(255,255,255,.045) 0 1.8px, transparent 2px) 0 0/72px 72px,
-        linear-gradient(135deg, #0a3a6d 0%, #072d55 45%, #04131f 100%);
-      color:#fff;
-      position:relative;
-      overflow:hidden;
-    }
-    .hero::after{
-      content:"";
-      position:absolute;
-      left:-4%;
-      right:-4%;
-      bottom:-28px;
-      height:72px;
-      background:#fff;
-      border-top-left-radius:60% 100%;
-      border-top-right-radius:60% 100%;
-      z-index:0;
-    }
-    .hero .wrap{
-      position:relative;
-      z-index:1;
-      min-height:860px;
-      display:grid;
-      grid-template-columns: 0.97fr 1.03fr;
-      align-items:center;
-      gap:48px;
-      padding:78px 0 96px;
-    }
-    .hero-copy{
-      padding-top:40px;
-      max-width:560px;
-    }
-    .eyebrow{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 16px;
-      border-radius:999px;
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.14);
-      color:#fff;
-      font-size:12px;
-      font-weight:800;
-      letter-spacing:.8px;
-      text-transform:uppercase;
-    }
-    .eyebrow .dot{
-      width:7px;height:7px;border-radius:50%;
-      background:var(--orange);
-      box-shadow:0 0 0 3px rgba(255,122,0,.12);
-    }
-    .hero h1{
-      margin:18px 0 18px;
-      font-family:Rajdhani,Inter,sans-serif;
-      font-size:clamp(54px,5.6vw,96px);
-      line-height:.94;
-      letter-spacing:-.03em;
-      font-weight:800;
-    }
-    .hero h1 .orange{color:var(--orange)}
-    .hero p{
-      margin:0;
-      color:rgba(255,255,255,.80);
-      font-size:18px;
-      line-height:1.7;
-      max-width:620px;
-    }
-    .hero-actions{
-      display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-      margin-top:30px;
-    }
-    .hero-stats{
-      display:flex;align-items:center;gap:28px;flex-wrap:wrap;
-      margin-top:34px;
-      color:rgba(255,255,255,.70);
-      font-size:14px;
-    }
-    .stat-inline{
-      display:flex;align-items:center;gap:10px;
-      background:rgba(255,255,255,.08);
-      padding:8px 12px;
-      border-radius:8px;
-    }
-    .stat-inline b{
-      color:var(--orange);
-      font-size:16px;
-      font-family:Rajdhani,Inter,sans-serif;
-      letter-spacing:.4px;
-    }
-
-    .hero-visual{
-      position:relative;
-      min-height:760px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding-top:24px;
-    }
-    .visual-card{
-      position:relative;
-      width:min(650px,100%);
-      height:620px;
-      border-radius:18px;
-      overflow:hidden;
-      background:linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
-      box-shadow:0 24px 55px rgba(0,0,0,.24);
-    }
-    .visual-card .img{
-      position:absolute;inset:0;
-      background:#dde6ef;
-    }
-    .visual-card .img img{
-      width:100%;height:100%;object-fit:cover;object-position:center top;
-    }
-    .badge-20{
-      position:absolute;
-      top:-18px;right:-18px;
-      background:var(--orange);
-      color:#fff;
-      border-radius:12px;
-      width:118px;height:88px;
-      display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
-      padding:14px 16px;
-      box-shadow:var(--shadow2);
-      font-family:Rajdhani,Inter,sans-serif;
-      font-weight:800;
-    }
-    .badge-20 span{
-      font-size:18px;line-height:1;
-      display:block;
-    }
-    .badge-20 small{
-      margin-top:6px;
-      font-size:13px;
-      line-height:1.05;
-      font-weight:700;
-    }
-    .iso-badge{
-      position:absolute;
-      left:18px;bottom:18px;
-      background:#fff;
-      color:var(--navy-2);
-      border-radius:12px;
-      padding:12px 16px;
-      display:flex;align-items:center;gap:10px;
-      box-shadow:var(--shadow2);
-      min-width:112px;
-    }
-    .iso-badge .icon{
-      width:28px;height:28px;border-radius:50%;
-      background:var(--navy-2);
-      color:#fff;
-      display:grid;place-items:center;
-      flex:none;
-    }
-    .iso-badge b{
-      display:block;
-      font-family:Rajdhani,Inter,sans-serif;
-      font-size:22px;
-      line-height:.95;
-      font-weight:800;
-      color:var(--navy-2);
-    }
-    .iso-badge small{display:block;color:#8797a8;margin-top:2px;font-weight:600}
-    .hero-hint{
-      position:absolute;
-      right:18px;bottom:18px;
-      background:#0d0d0f;
-      color:#fff;
-      border-radius:999px;
-      padding:7px 10px;
-      display:flex;align-items:center;gap:7px;
-      font-size:12px;
-      box-shadow:var(--shadow);
-    }
-    .hero-hint .circle{
-      width:18px;height:18px;border-radius:50%;
-      background:#fff;
-      color:#111;
-      display:grid;place-items:center;
-      font-size:11px;
-      font-weight:900;
-    }
-
-    .card-row{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:18px;
-      padding:72px 0 84px;
-      margin-top:2px;
-    }
-    .info-card{
-      background:linear-gradient(180deg,#f0f7ff,#fff);
-      border:1px solid #e2ebf4;
-      border-radius:16px;
-      box-shadow:var(--shadow);
-      padding:20px 18px 18px;
-      min-height:120px;
-    }
-    .info-card .ico{
-      width:34px;height:34px;border-radius:10px;
-      background:var(--navy-2);
-      color:#fff;display:grid;place-items:center;
-      margin-bottom:14px;
-      font-size:17px;
-    }
-    .info-card h3{
-      margin:0 0 6px;
-      font-size:16px;
-      color:var(--navy-2);
-      font-family:Rajdhani,Inter,sans-serif;
-      font-weight:800;
-      letter-spacing:.1px;
-    }
-    .info-card p{
-      margin:0;
-      font-size:13px;
-      color:#5f6f82;
-      line-height:1.5;
-    }
-
-    .why{
-      background:#dfeefe;
-      padding:82px 0 96px;
-      border-top:1px solid #e7f0f8;
-    }
-    .why .row{
-      display:grid;
-      grid-template-columns: 0.92fr 1.08fr;
-      gap:36px;
-      align-items:center;
-    }
-    .kicker{
-      display:inline-block;
-      padding:8px 16px;
-      background:#fff;
-      color:var(--navy-2);
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      margin-bottom:14px;
-      box-shadow:var(--shadow);
-    }
-    .why h2{
-      margin:0 0 18px;
-      font-family:Rajdhani,Inter,sans-serif;
-      font-size:clamp(40px,4.4vw,72px);
-      line-height:.96;
-      color:var(--navy-2);
-      font-weight:800;
-      letter-spacing:-.03em;
-    }
-    .why .lead{
-      font-size:18px;
-      line-height:1.65;
-      color:#40556b;
-      margin-bottom:26px;
-      max-width:650px;
-    }
-    .bullet-list{
-      list-style:none;
-      padding:0;
-      margin:0 0 28px;
-      display:grid;
-      gap:16px;
-    }
-    .bullet-list li{
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      color:#33495f;
-      font-size:16px;
-      line-height:1.55;
-    }
-    .bullet-list .mark{
-      width:24px;height:24px;
-      border-radius:50%;
-      border:2px solid var(--orange);
-      color:var(--orange);
-      display:grid;place-items:center;
-      font-weight:900;
-      flex:none;
-      margin-top:1px;
-      font-size:16px;
-    }
-    .why .cta{
-      display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-    }
-    .why .cta .btn{
-      height:48px;padding:0 20px;
-      font-size:14px;
-    }
-
-    .collage{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:16px;
-      align-items:stretch;
-    }
-    .mini-shot{
-      background:#fff;
-      border-radius:16px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-height:170px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .mini-shot img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .spacer{height:1px;background:#eff4f8;margin-top:68px}
-
-    @media (max-width: 1080px){
-      .nav-links,.nav-actions{display:none}
-      .menu-btn{display:inline-flex}
-      .hero .wrap{grid-template-columns:1fr;min-height:auto;padding-top:54px;padding-bottom:46px}
-      .hero-copy{max-width:none;padding-top:0}
-      .hero-visual{min-height:auto;padding-top:24px}
-      .visual-card{width:min(680px,100%);height:560px}
-      .card-row{grid-template-columns:repeat(2,1fr)}
-      .why .row{grid-template-columns:1fr}
-    }
-    @media (max-width: 640px){
-      .topbar{height:auto;padding:10px 0}
-      .topbar .row{white-space:normal;align-items:flex-start;flex-direction:column}
-      .top-right{flex-wrap:wrap;gap:10px}
-      .login-pill{padding:10px 16px}
-      .container{width:min(var(--max),calc(100% - 20px))}
-      .hero h1{font-size:46px}
-      .hero p,.why .lead{font-size:16px}
-      .card-row{grid-template-columns:1fr}
-      .collage{grid-template-columns:1fr 1fr}
-      .visual-card{height:470px}
-      .badge-20{right:10px;top:10px}
-      .iso-badge{left:10px;bottom:10px}
-    }
-    @media (max-width: 480px){
-      .collage{grid-template-columns:1fr}
-      .hero h1{font-size:40px}
-      .why h2{font-size:34px}
-    }
-  </style>
+  <link rel="stylesheet" href="script.css" />
+  <script defer src="script.js"></script>
 </head>
 <body>
   <header class="topbar">
     <div class="container row">
-      <div class="top-left">
+      <div class="left">
         <span class="accent">Welcome to Everest Security</span>
         <span class="sep">|</span>
         <span>Your Safety, Our Priority</span>
       </div>
-      <div class="top-right">
-        <div class="item">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.5 4.5c1.1 0 2 .9 2 2v1.5c0 .7-.3 1.3-.8 1.8l-1 1c1.2 2.5 3.2 4.5 5.7 5.7l1-1c.5-.5 1.1-.8 1.8-.8h1.5c1.1 0 2 .9 2 2v1.8c0 .8-.5 1.5-1.2 1.8-.9.4-2 .7-3.1.7C11 22 2 13 2 3.1c0-1.1.3-2.2.7-3.1C3 .3 3.7-.2 4.5-.2H6.3c1.1 0 2 .9 2 2v1.7z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>+91 9624696247</span>
-        </div>
-        <div class="item">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v14H4V5z" stroke="currentColor" stroke-width="1.7"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>info@everestsecurityonline.com</span>
-        </div>
-        <a class="login-pill" href="client.login.html">
-          <span style="font-size:18px">↪</span>
-          Client Login
-        </a>
+      <div class="right">
+        <span>+91 9624696247</span>
+        <span class="sep">|</span>
+        <span>info@everestsecurityonline.com</span>
+        <a class="btn btn-sm" style="background:#4a372f;color:#fff" href="client.login.html">Client Login</a>
       </div>
     </div>
   </header>
@@ -547,38 +30,42 @@
   <header class="navbar">
     <div class="container row">
       <a class="brand" href="index.html">
-        <div class="brand-mark">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 3.5 18.5 6v4.7c0 4.8-3.1 7.8-6.5 9.8-3.4-2-6.5-5-6.5-9.8V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <div class="logo">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3.5 18.5 6v4.7c0 4.8-3.1 7.8-6.5 9.8-3.4-2-6.5-5-6.5-9.8V6L12 3.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
           </svg>
         </div>
-        <div class="brand-text">
-          <span class="name">EVEREST</span>
-          <span class="sub">SECURITY</span>
+        <div class="wordmark">
+          <b>EVEREST</b>
+          <span>SECURITY</span>
         </div>
       </a>
 
-      <nav class="nav-links">
+      <nav class="nav">
         <a class="active" href="index.html">Home</a>
-        <a href="about.html">About <span class="caret">▾</span></a>
-        <a href="products.html">Products <span class="caret">▾</span></a>
-        <a href="services.html">Services <span class="caret">▾</span></a>
-        <a href="#">Sectors <span class="caret">▾</span></a>
+        <a href="about.html">About <span style="font-size:12px">▾</span></a>
+        <a href="products.html">Products <span style="font-size:12px">▾</span></a>
+        <a href="services.html">Services <span style="font-size:12px">▾</span></a>
+        <a href="#">Sectors <span style="font-size:12px">▾</span></a>
         <a href="contact.html">Contact</a>
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-outline" href="client.login.html">
+        <a class="btn btn-light btn-sm" href="client.login.html">
           <span style="font-size:18px">↪</span>
           Client Login
         </a>
-        <a class="btn btn-primary" href="contact.html">Get Quote</a>
+        <a class="btn btn-primary btn-sm" href="contact.html">Get Quote</a>
       </div>
 
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+      <button class="mobile-toggle" data-menu-toggle aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
 
-    <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav" data-mobile-nav>
       <div class="container inner">
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
@@ -598,18 +85,21 @@
           <span class="eyebrow"><span class="dot"></span>Israeli Technology &amp; Supervision</span>
           <h1>24/7 Advanced <span class="orange">Security</span><br>Solutions</h1>
           <p>
-            Protecting what matters most with cutting-edge Israeli technology and 20+ years of expertise.
-            Your safety is our mission, your trust is our commitment.
+            Protecting what matters most with cutting-edge Israeli technology
+            and 20+ years of expertise. Your safety is our mission, your trust is
+            our commitment.
           </p>
+
           <div class="hero-actions">
             <a class="btn btn-orange" href="products.html">
               Explore Solutions
               <span style="font-size:18px">→</span>
             </a>
-            <a class="btn btn-outline" href="contact.html" style="background:#fff;color:var(--navy-2);border:none">
+            <a class="btn btn-light" href="about.html" style="background:#fff;color:var(--navy-2);border:none">
               Learn More
             </a>
           </div>
+
           <div class="hero-stats">
             <div class="stat-inline"><b>20+</b><span>Years Experience</span></div>
             <div class="stat-inline"><b>5000+</b><span>Happy Clients</span></div>
@@ -620,7 +110,7 @@
         <div class="hero-visual">
           <div class="visual-card">
             <div class="img">
-              <img src="images/products/about-us-everest.png" alt="Everest Security building">
+              <img src="images/products/about-us-everest.png" alt="Everest Security headquarters">
             </div>
 
             <div class="badge-20">
@@ -676,7 +166,9 @@
           <div class="kicker">Why Choose Us</div>
           <h2>Your Security is Our Priority</h2>
           <p class="lead">
-            We combine cutting-edge Israeli technology with 20+ years of local expertise to deliver security solutions that truly protect what matters most to you.
+            We combine cutting-edge Israeli technology with 20+ years of local
+            expertise to deliver security solutions that truly protect what matters
+            most to you.
           </p>
 
           <ul class="bullet-list">
@@ -710,16 +202,85 @@
       </div>
       <div class="spacer"></div>
     </section>
+
+    <section class="section dark footer-cta">
+      <div class="container">
+        <h2>Ready to Secure Your Premises?</h2>
+        <p class="sub">
+          Get a free security assessment and quote. Our experts will analyze your
+          requirements and recommend the best solution for your needs.
+        </p>
+        <div class="actions">
+          <a class="btn btn-orange" href="contact.html">Get Free Quote</a>
+          <a class="btn btn-light" href="tel:+919624696247" style="background:#fff;color:var(--navy-2)">Call Now</a>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script>
-    const btn = document.getElementById('menuBtn');
-    const mobileNav = document.getElementById('mobileNav');
-    btn?.addEventListener('click', () => mobileNav.classList.toggle('open'));
+  <footer class="footer">
+    <div class="container top">
+      <div class="cols">
+        <div>
+          <div class="brand" style="margin-bottom:14px">
+            <div class="logo" style="background:var(--orange)">⟡</div>
+            <div class="wordmark">
+              <b style="color:#fff">EVEREST</b>
+              <span>SECURITY</span>
+            </div>
+          </div>
+          <p class="small">
+            Leading security solutions provider with Israeli technology expertise.
+            Protecting what matters most since 2003. We offer comprehensive
+            security solutions for homes, businesses, and institutions across India.
+          </p>
+          <div class="social">
+            <a href="#">f</a>
+            <a href="#">t</a>
+            <a href="#">in</a>
+            <a href="#">▶</a>
+          </div>
+          <a class="btn btn-orange btn-sm" href="client.login.html">Client Login</a>
+        </div>
 
-    document.querySelectorAll('.mobile-nav a').forEach(a => {
-      a.addEventListener('click', () => mobileNav.classList.remove('open'));
-    });
-  </script>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Our Services</h4>
+          <ul class="links">
+            <li><a href="services.html">Bank Security</a></li>
+            <li><a href="services.html">ATM Protection</a></li>
+            <li><a href="services.html">GPRS Tracking</a></li>
+            <li><a href="services.html">Warehouse Security</a></li>
+            <li><a href="services.html">Employee Tracking</a></li>
+            <li><a href="services.html">Decorative Fencing</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Stay Updated</h4>
+          <p class="small">Subscribe for latest security tips, product updates, and exclusive offers.</p>
+          <div class="email">
+            <input type="email" placeholder="Enter your email">
+            <button class="btn btn-orange btn-sm">Subscribe</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom container">
+      <span>© 2026 Everest Security Pvt. Ltd. All rights reserved.</span>
+      <span>Privacy Policy &nbsp;&nbsp; Terms of Service</span>
+    </div>
+  </footer>
 </body>
 </html>
